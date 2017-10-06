@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+.wrapper {
+	display: flex;
+	-webkit-justify-content: space-between; /* Safari */
+	justify-content: space-between;
+}
+
+.wrapper2 {
+	display: flex;
+}
+
+.button_wrapper {
+	text-align: center;
+}
