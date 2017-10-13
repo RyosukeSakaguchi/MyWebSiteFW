@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-US" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="utf-8"/>
+		<title>ログイン画面</title>
+		<link rel="stylesheet" th:href="@{/css/original/LoginScreen.css}"/>
+	</head>
+
+	<body>
+		<div align="center">
+			<br/><br/><br/>
+			<font size="5" color="white" th:text="${logout}"></font>
+			<font size="5" color="red" th:text="${errMsg}"></font>
+		</div>
+		<div id="login">
+			<form name='form-login' th:action="@{/LoginScreen}" th:object="${loginScreenForm}" method="post">
+				<font color="red"><div th:if="${#fields.hasErrors('loginId')}" th:errors="*{loginId}"></div></font><br/>
+				<span class="fontawesome-user"></span><input type="text" name="loginId" th:field="*{loginId}" placeholder="loginID"/>
+				<font color="red"><div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div></font><br/>
+				<span class="fontawesome-lock"></span><input type="password" name="password" placeholder="Password"/>
+				<input type="submit" value="ログイン"/>
+			</form>
+		</div>
+	</body>
+
+</html>
