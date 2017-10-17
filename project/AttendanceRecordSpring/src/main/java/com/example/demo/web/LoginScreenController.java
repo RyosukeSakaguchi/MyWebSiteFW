@@ -37,10 +37,10 @@ public class LoginScreenController {
 		} else {
 			if(loginUser.getId() == 1) {
 				// ログインユーザーが管理者のとき、UserListへリダイレクト
-				return "UserList";
+				return "redirect:/UserList";
 			} else {
 				// ログインユーザーが一般ユーザーのとき、WorkSituationRegistrationへリダイレクト
-				return "WorkSituationRegistration";
+				return "redirect:/WorkSituationRegistration";
 			}
 		}
 	}
@@ -82,10 +82,10 @@ public class LoginScreenController {
 			// 管理者か一般ユーザーかで分岐
 			if (userInfo.getId() == 1) {
 				// UserListへリダイレクト
-				return "userList";
+				return "redirect:/UserList";
 			} else {
 				// WorkSituationRegistrationへリダイレクト
-				return "WorkSituationRegistration";
+				return "redirect:/WorkSituationRegistration";
 			}
 		}
 

@@ -1,14 +1,15 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ page import="beans.UserBeans"%>
-<%@ page import="dao.DaoUtil"%>
-<%@ page import="java.sql.Time"%>
 <!DOCTYPE html>
 <html class="no-js">
 
 	<head>
-		<!-- 共通header.jsp読み込み-->
-		<jsp:include page="header.jsp" />
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script type="text/javascript">
+			$(function(){
+				$("#header").load("header.html");
+			})
+		</script>
+		<!-- 共通header.html読み込み-->
+		<div id="header"></div>
 		<title>勤務状況登録</title>
 	</head>
 
@@ -40,7 +41,7 @@
 								<h2 class="animate-box">Work Situation Registration</h2>
 								<div align="center">
 									<font size="5" color="red">${errMsg}</font>
-								</div><br>
+								</div><br/>
 								<div align="center">
 									<font size="5" color="#99FF33">${confMsg}</font>
 								</div>
@@ -48,34 +49,34 @@
 								<c:choose>
 									<c:when test="${result1}">
 										<div align="center">
-											<br><font size="5" color="red">${overStartTimeMsg}</font><br><br>
+											<br/><font size="5" color="red">${overStartTimeMsg}</font><br/><br/>
 										</div>
 										<form action="WorkSituationRegistration" method="post">
-											<input type="hidden" name="id" value="${loginUser.getId()}">
-											<input type="hidden" name="situation" value="start">
+											<input type="hidden" name="id" value="${loginUser.getId()}"/>
+											<input type="hidden" name="situation" value="start"/>
 											<button class="btn btn-outline" type="submit" style="color: red;"><i class="icon-play2" style="color: white;"></i> Start</button>
 										</form>
 									</c:when>
 									<c:when test="${result2}">
 										<div align="center">
-											<br><font size="5" color="red">${overEndTimeMsg}</font>
+											<br/><font size="5" color="red">${overEndTimeMsg}</font>
 										</div>
 										<form action="WorkSituationRegistration?id=${loginUser.getId()}" method="post">
-										<br>
+										<br/>
 										<div class="form-group" style="margin-left: 200px;">
 											<label for="inputName" class="col-sm-2 control-label" style="width: 100px;">休憩時間</label>
 											<div class="col-sm-3">
-												<input type="time" value="${DaoUtil.getTime(1, 'break_time')}"  class="form-control" id="inputName" name="breakTime" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;">
+												<input type="time" value="${DaoUtil.getTime(1, 'break_time')}"  class="form-control" id="inputName" name="breakTime" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 											</div>
 										</div>
-										<br><br>
-											<input type="hidden" name="situation" value="end" >
+										<br/><br/>
+											<input type="hidden" name="situation" value="end" />
 											<button name="situation" value="end" type="submit"  class="btn btn-outline" style="color: red;"><i class="icon-play2" style="color: white;"></i> End</button>
 										</form>
 									</c:when>
 									<c:otherwise>
 										<div align="center">
-											<br><font size="5" color="white">お疲れ様でした。</font>
+											<br/><font size="5" color="white">お疲れ様でした。</font>
 										</div>
 									</c:otherwise>
 								</c:choose>

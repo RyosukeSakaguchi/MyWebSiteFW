@@ -2,8 +2,8 @@ package com.example.demo.repository;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.example.demo.model.Salary;
+import com.example.demo.model.SalaryMaster;
 
-public interface SalaryRepository  extends CrudRepository< Salary, Long> {
+public interface SalaryRepository  extends CrudRepository< SalaryMaster, Long> {
 
 }

@@ -1,0 +1,158 @@
+package com.example.demo.web;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.demo.common.UtilLogic;
+import com.example.demo.form.UserListForm;
+import com.example.demo.model.PositionMaster;
+import com.example.demo.model.User;
+import com.example.demo.repository.PositionRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.WorkSituationRepository;
+
+
+@RequestMapping("/UserList")
+@Controller
+public class UserListController {
+
+	@Autowired
+	HttpSession session;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private PositionRepository positionRepository;
+	@Autowired
+	private WorkSituationRepository workSituationRepository;
+
+	@GetMapping
+	public String get(@ModelAttribute UserListForm userListForm, Model model) {
+
+		// HttpSessionインスタンスの取得
+		User loginUser = (User) session.getAttribute("loginUser");
+		// セッションにログイン情報があるかないかで分岐
+		if (loginUser == null) {
+			// LoginScreenへリダイレクト
+			return "LoginScreen";
+		} else if (loginUser.getId() != 1) {
+			// LoginScreenへリダイレクト
+			return "WorkSituationRegistration";
+		} else {
+			// 1ページ毎に表示するユーザー数を5ユーザーにする
+			int userNumberPerPage = 5;
+
+			// リクエストパラメーターがnullかどうかで分岐
+			if (userListForm.getPageNumber() != 0) {
+
+				// リクエストパラメータがnullでない時、idリストのパラメータに対応するユーザーリストを生成
+				List<User> userList = new ArrayList<User>();
+				int[] userIdList = userListForm.getUserIdList();
+				for (int i = 0; i < userIdList.length; i++) {
+					User userInfo = userRepository.findByIdIs(userIdList[i]);
+					userList.add(userInfo);
+				}
+				int pageNumber = userListForm.getPageNumber();
+
+				// リクエストスコープに保存
+				int totalPageNumber = UtilLogic.getTotalPageNumber(userList, userNumberPerPage);
+				model.addAttribute("userNumberPerPage", userNumberPerPage);
+				model.addAttribute("totalPageNumber", totalPageNumber);
+				model.addAttribute("pageNumber", pageNumber);
+				model.addAttribute("userList", userList);
+				model.addAttribute("login_id", userListForm.getLoginId());
+				model.addAttribute("name", userListForm.getName());
+				model.addAttribute("position", userListForm.getPosition());
+				model.addAttribute("birth_date_from", userListForm.getBirthDateFrom());
+				model.addAttribute("birth_date_to", userListForm.getBirthDateTo());
+				model.addAttribute("workSituation", userListForm.getWorkSituation());
+			} else {
+				// userテーブルにある全てのユーザーを取り出し、勤務中のユーザー」を先に並べ、
+				// 「帰宅しているユーザー」を後に並べかえ、 さらに管理者がリストに入っている場合は取り除く
+				List<User> userList = userRepository.findAll();
+				userList = UtilLogic.userListSort(userList, workSituationRepository);
+
+				// リクエストスコープに保存
+				int totalPageNumber = UtilLogic.getTotalPageNumber(userList, userNumberPerPage);
+				int pageNumber = 1;
+				model.addAttribute("userNumberPerPage", userNumberPerPage);
+				model.addAttribute("totalPageNumber", totalPageNumber);
+				model.addAttribute("pageNumber", pageNumber);
+				model.addAttribute("userList", userList);
+			}
+
+			Date now = new Date();
+			SimpleDateFormat y = new SimpleDateFormat("yyyy");
+			SimpleDateFormat m = new SimpleDateFormat("MM");
+			int year = Integer.parseInt(y.format(now));
+			int month = Integer.parseInt(m.format(now));
+
+			List<PositionMaster> positionList = positionRepository.findAll();
+			// リクエストパラメーターを保存
+			model.addAttribute("positionList", positionList);
+			model.addAttribute("year", year);
+			model.addAttribute("month", month);
+			model.addAttribute("workSituationRepository", workSituationRepository);
+
+			// userList.htmlへフォワード
+			return "userList";
+		}
+	}
+
+	@PostMapping
+	public String post(@Validated @ModelAttribute UserListForm userListForm, Model model) {
+
+		try {
+			// ユーザーを検索し、userListに代入
+			List<User> userList = UtilLogic.searchUser(userListForm.getLoginId(),
+					userListForm.getName(), userListForm.getPosition(),
+					userListForm.getBirthDateFrom(), userListForm.getBirthDateTo(),
+					userListForm.getWorkSituation(), userRepository, workSituationRepository);
+
+			// リクエストパラメータを保存
+			int userNumberPerPage = 5;
+			int totalPageNumber = UtilLogic.getTotalPageNumber(userList, userNumberPerPage);
+			int pageNumber = 1;
+			model.addAttribute("userList", userList);
+			model.addAttribute("userNumberPerPage", userNumberPerPage);
+			model.addAttribute("totalPageNumber", totalPageNumber);
+			model.addAttribute("pageNumber", pageNumber);
+			model.addAttribute("login_id", userListForm.getLoginId());
+			model.addAttribute("name", userListForm.getName());
+			model.addAttribute("position", userListForm.getPosition());
+			model.addAttribute("birth_date_from", userListForm.getBirthDateFrom());
+			model.addAttribute("birth_date_to", userListForm.getBirthDateTo());
+			model.addAttribute("workSituation", userListForm.getWorkSituation());
+
+			Date now = new Date();
+			SimpleDateFormat y = new SimpleDateFormat("yyyy");
+			SimpleDateFormat m = new SimpleDateFormat("MM");
+			int year = Integer.parseInt(y.format(now));
+			int month = Integer.parseInt(m.format(now));
+
+			List<Position> positionList = DaoUtil.findAllPosition();
+			// リクエストパラメーターを保存
+			model.addAttribute("positionList", positionList);
+			model.addAttribute("year", year);
+			model.addAttribute("month", month);
+
+			// userList.htmlへフォワード
+			return "userList";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}
