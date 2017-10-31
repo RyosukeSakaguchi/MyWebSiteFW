@@ -1,15 +1,9 @@
 <!DOCTYPE html>
-<html class="no-js">
+<html class="no-js" xmlns:th="http://www.thymeleaf.org">
 
 	<head>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-		<script type="text/javascript">
-			$(function(){
-				$("#header").load("header.html");
-			})
-		</script>
 		<!-- 共通header.html読み込み-->
-		<div id="header"></div>
+		<div th:replace="header"></div>
 		<title>勤務状況登録</title>
 	</head>
 
@@ -22,17 +16,17 @@
 					<nav role="navigation">
 						<h1 id="fh5co-logo"></h1>
 						<ul class="pull-left left-menu">
-							<li class="fh5co-cta-btn"><a href="UserDetail?id=${loginUser.getId()}">あなたの情報</a></li>
-							<li class="fh5co-cta-btn"><a href="UserUpdate?id=${loginUser.getId()}">情報更新</a></li>
+							<li class="fh5co-cta-btn"><a th:href="'UserDetail?id=' + ${loginUser.getId()}">あなたの情報</a></li>
+							<li class="fh5co-cta-btn"><a th:href="'UserUpdate?id=' + ${loginUser.getId()}">情報更新</a></li>
 						</ul>
 						<ul class="pull-right right-menu">
-							<li class="fh5co-cta-btn"><a href="Logout">ログアウト</a></li>
+							<li class="fh5co-cta-btn"><a th:href="Logout">ログアウト</a></li>
 						</ul>
 					</nav>
 				</div>
 			</section>
 
-			<section id="fh5co-hero" class="js-fullheight" style="background-image: url(/AttendanceRecord/jsp/images/hero_bg.jpg);" data-next="yes">
+			<section id="fh5co-hero" class="js-fullheight" style="background-image: url(images/hero_bg.jpg);" data-next="yes">
 				<div class="fh5co-overlay"></div>
 				<div class="container">
 					<div class="fh5co-intro js-fullheight">
@@ -46,40 +40,38 @@
 									<font size="5" color="#99FF33">${confMsg}</font>
 								</div>
 								<p class="animate-box"></p>
-								<c:choose>
-									<c:when test="${result1}">
-										<div align="center">
-											<br/><font size="5" color="red">${overStartTimeMsg}</font><br/><br/>
+								<div th:if="${result1}">
+									<div align="center">
+										<br/><font size="5" color="red">${overStartTimeMsg}</font><br/><br/>
+									</div>
+									<form action="WorkSituationRegistration" method="post">
+										<input type="hidden" name="id" value="${loginUser.getId()}"/>
+										<input type="hidden" name="situation" value="start"/>
+										<button class="btn btn-outline" type="submit" style="color: red;"><i class="icon-play2" style="color: white;"></i> Start</button>
+									</form>
+								</div>
+								<div th:if="${result2}">
+									<div align="center">
+										<br/><font size="5" color="red">${overEndTimeMsg}</font>
+									</div>
+									<form action="WorkSituationRegistration?id=${loginUser.getId()}" method="post">
+									<br/>
+									<div class="form-group" style="margin-left: 200px;">
+										<label for="inputName" class="col-sm-2 control-label" style="width: 100px;">休憩時間</label>
+										<div class="col-sm-3">
+											<input type="time" value="${DaoUtil.getTime(1, 'break_time')}"  class="form-control" id="inputName" name="breakTime" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 										</div>
-										<form action="WorkSituationRegistration" method="post">
-											<input type="hidden" name="id" value="${loginUser.getId()}"/>
-											<input type="hidden" name="situation" value="start"/>
-											<button class="btn btn-outline" type="submit" style="color: red;"><i class="icon-play2" style="color: white;"></i> Start</button>
-										</form>
-									</c:when>
-									<c:when test="${result2}">
-										<div align="center">
-											<br/><font size="5" color="red">${overEndTimeMsg}</font>
-										</div>
-										<form action="WorkSituationRegistration?id=${loginUser.getId()}" method="post">
-										<br/>
-										<div class="form-group" style="margin-left: 200px;">
-											<label for="inputName" class="col-sm-2 control-label" style="width: 100px;">休憩時間</label>
-											<div class="col-sm-3">
-												<input type="time" value="${DaoUtil.getTime(1, 'break_time')}"  class="form-control" id="inputName" name="breakTime" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
-											</div>
-										</div>
-										<br/><br/>
-											<input type="hidden" name="situation" value="end" />
-											<button name="situation" value="end" type="submit"  class="btn btn-outline" style="color: red;"><i class="icon-play2" style="color: white;"></i> End</button>
-										</form>
-									</c:when>
-									<c:otherwise>
-										<div align="center">
-											<br/><font size="5" color="white">お疲れ様でした。</font>
-										</div>
-									</c:otherwise>
-								</c:choose>
+									</div>
+									<br/><br/>
+										<input type="hidden" name="situation" value="end" />
+										<button name="situation" value="end" type="submit"  class="btn btn-outline" style="color: red;"><i class="icon-play2" style="color: white;"></i> End</button>
+									</form>
+								</div>
+								<div th:if="${result3}">
+									<div align="center">
+										<br/><font size="5" color="white">お疲れ様でした。</font>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -87,8 +79,8 @@
 			</section>
 		</div>
 
-		<!-- 共通footer.jsp読み込み-->
-		<jsp:include page="footer.jsp" />
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
 
 	</body>
 

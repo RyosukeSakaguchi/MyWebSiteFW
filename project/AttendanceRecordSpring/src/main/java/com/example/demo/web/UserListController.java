@@ -1,8 +1,8 @@
 package com.example.demo.web;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -23,7 +23,6 @@ import com.example.demo.model.User;
 import com.example.demo.repository.PositionRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkSituationRepository;
-
 
 @RequestMapping("/UserList")
 @Controller
@@ -46,10 +45,10 @@ public class UserListController {
 		// セッションにログイン情報があるかないかで分岐
 		if (loginUser == null) {
 			// LoginScreenへリダイレクト
-			return "LoginScreen";
+			return "redirect:/LoginScreen";
 		} else if (loginUser.getId() != 1) {
-			// LoginScreenへリダイレクト
-			return "WorkSituationRegistration";
+			// WorkSituationRegistrationへリダイレクト
+			return "redirect:/WorkSituationRegistration";
 		} else {
 			// 1ページ毎に表示するユーザー数を5ユーザーにする
 			int userNumberPerPage = 5;
@@ -93,17 +92,24 @@ public class UserListController {
 				model.addAttribute("userList", userList);
 			}
 
-			Date now = new Date();
+			Date now = new Date(System.currentTimeMillis());
 			SimpleDateFormat y = new SimpleDateFormat("yyyy");
 			SimpleDateFormat m = new SimpleDateFormat("MM");
 			int year = Integer.parseInt(y.format(now));
 			int month = Integer.parseInt(m.format(now));
+			String startDateString = year + "-" + month + "-01";
+			String endDateString = year + "-" + month + "-31";
+			Date startDate = Date.valueOf(startDateString);
+			Date endDate = Date.valueOf(endDateString);
 
 			List<PositionMaster> positionList = positionRepository.findAll();
 			// リクエストパラメーターを保存
+			model.addAttribute("utilLogic", new UtilLogic());
 			model.addAttribute("positionList", positionList);
 			model.addAttribute("year", year);
 			model.addAttribute("month", month);
+			model.addAttribute("startDate", startDate);
+			model.addAttribute("endDate", endDate);
 			model.addAttribute("workSituationRepository", workSituationRepository);
 
 			// userList.htmlへフォワード
@@ -116,10 +122,9 @@ public class UserListController {
 
 		try {
 			// ユーザーを検索し、userListに代入
-			List<User> userList = UtilLogic.searchUser(userListForm.getLoginId(),
-					userListForm.getName(), userListForm.getPosition(),
-					userListForm.getBirthDateFrom(), userListForm.getBirthDateTo(),
-					userListForm.getWorkSituation(), userRepository, workSituationRepository);
+			List<User> userList = userRepository.findByLoginIdIsAndNameContainingAndPositionIsAndBirthDateBetween(
+					userListForm.getLoginId(), userListForm.getName(), userListForm.getPosition(),
+					Date.valueOf(userListForm.getBirthDateFrom()), Date.valueOf(userListForm.getBirthDateTo()));
 
 			// リクエストパラメータを保存
 			int userNumberPerPage = 5;
@@ -136,23 +141,23 @@ public class UserListController {
 			model.addAttribute("birth_date_to", userListForm.getBirthDateTo());
 			model.addAttribute("workSituation", userListForm.getWorkSituation());
 
-			Date now = new Date();
+			Date now = new Date(System.currentTimeMillis());
 			SimpleDateFormat y = new SimpleDateFormat("yyyy");
 			SimpleDateFormat m = new SimpleDateFormat("MM");
 			int year = Integer.parseInt(y.format(now));
 			int month = Integer.parseInt(m.format(now));
 
-			List<Position> positionList = DaoUtil.findAllPosition();
+			List<PositionMaster> positionList = positionRepository.findAll();
 			// リクエストパラメーターを保存
 			model.addAttribute("positionList", positionList);
 			model.addAttribute("year", year);
 			model.addAttribute("month", month);
 
-			// userList.htmlへフォワード
-			return "userList";
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		// userList.htmlへフォワード
+		return "userList";
 	}
 
 }

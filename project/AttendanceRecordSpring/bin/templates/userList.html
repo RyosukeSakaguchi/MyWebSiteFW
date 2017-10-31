@@ -2,17 +2,17 @@
 <html class="no-js" xmlns:th="http://www.thymeleaf.org">
 
 	<head>
-		<!--#include virtual="header.html" -->
+		<!-- 共通header.html読み込み-->
+		<div th:replace="header"></div>
 		<title>ユーザー一覧</title>
 		<!-- オリジナルCSS読み込み -->
 		<link rel="stylesheet" th:href="@{css/original/common.css}" />
-		<script src="/AttendanceRecord/jsp/js/modernizr.custom.63321.js"></script>
+		<script src="/js/modernizr.custom.63321.js"></script>
 	</head>
 
 	<body>
 		<div class="fh5co-loader"></div>
 		<div id="fh5co-page">
-
 			<section id="fh5co-header">
 				<div class="container">
 					<nav role="navigation">
@@ -25,7 +25,7 @@
 				</div>
 			</section>
 
-			<section id="fh5co-hero" style="background-image: url(/AttendanceRecord/jsp/images/hero_bg.jpg); height: 600px;" data-next="yes">
+			<section id="fh5co-hero" style="background-image: url(/images/hero_bg.jpg); height: 600px;" data-next="yes">
 				<div class="fh5co-overlay"></div>
 				<div class="container">
 					<div class="fh5co-intro" style="height: 700px;">
@@ -33,7 +33,7 @@
 							<div class="wrapper2">
 								<div class="fh5co-left-position"><br/> <br/>
 									<h2 class="animate-box">User List</h2>
-									<font size="5" color="white">${errMsg}</font>
+									<font size="5" color="white"><div th:text="${errMsg}" /></font>
 								</div>
 								<div class="fh5co-right-position">
 									<form action="UserList" th:object="${userListForm}" method="POST">
@@ -131,85 +131,90 @@
 
 			<section id="fh5co-projects">
 				<div class="container">
-					<font size="5" color="red">${noCheckMsg}</font><br/><br/>
-
-						<div class="wrapper" style="justify-content:center;">
-								<div th:if="${pageNumber != 1}">
-									<div >
-										<form action="UserList" th:object="${userListForm}" method="get">
-											<button  role="button" type="submit" style ="color : #85919d; width : 10px ; background-color : rgb(249, 249, 249); border-style: none; "><span class="icon-angle-double-left" aria-hidden="true"></span></button>
-											<input type="hidden" name="pageNumber" value="1"/>
-											<input type="hidden"  name="login_id" value="*${loginId}"/>
-											<input type="hidden" name="name" value="*${name}"/>
-											<input type="hidden" name="position" value="*${position}"/>
-											<input type="hidden" name="birth_date_from" value="*${birth_date_from}"/>
-											<input type="hidden" name="birth_date_to" value="*${birth_date_to}"/>
-											<input type="hidden" name="workSituation" value="*${workSituation}"/>
-											<div th:inline="text" th:each="user : ${userList}">
-												<input type="hidden" name="userIdList[]" value="${user.id}" />
-											</div>
-										</form>
-									</div>　
-									<div >
-										<form action="UserList" method="get">
-											<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-left" aria-hidden="true"></span></button>
-											<input type="hidden" name="pageNumber" value="*${pageNumber-1}"/>
-											<input type="hidden"  name="login_id" value="*${login_id}"/>
-											<input type="hidden" name="name" value="*${name}"/>
-											<input type="hidden" name="position" value="*${position}"/>
-											<input type="hidden" name="birth_date_from" value="*${birth_date_from}"/>
-											<input type="hidden" name="birth_date_to" value="*${birth_date_to}"/>
-											<input type="hidden" name="workSituation" value="*${workSituation}"/>
-											<div th:inline="text" th:each="user : ${userList}">
-												<input type="hidden" name="userIdList[]" value="${user.id}" />
-											</div>
-										</form>
-									</div>
+					<font size="5" color="red"><div th:text="${noCheckMsg}" /></font><br/><br/>
+					<div class="wrapper" style="justify-content:center;">
+						<div th:if="${pageNumber != 1}">
+							<div class="wrapper">
+								<div >
+									<form action="UserList" th:object="${userListForm}" method="get">
+										<button  role="button" type="submit" style ="color : #85919d; width : 10px ; background-color : rgb(249, 249, 249); border-style: none; "><span class="icon-angle-double-left" aria-hidden="true"></span></button>
+										<input type="hidden" name="pageNumber" value="1"/>
+										<input type="hidden"  name="login_id" value="*${loginId}"/>
+										<input type="hidden" name="name" value="*${name}"/>
+										<input type="hidden" name="position" value="*${position}"/>
+										<input type="hidden" name="birth_date_from" value="*${birthDateFrom}"/>
+										<input type="hidden" name="birth_date_to" value="*${birthDateTo}"/>
+										<input type="hidden" name="workSituation" value="*${workSituation}"/>
+										<div th:inline="text" th:each="user : ${userList}">
+											<input type="hidden" name="userIdList[]" value="${user.id}" />
+										</div>
+									</form>
+								</div>　
+								<div >
+									<form action="UserList" th:object="${userListForm}" method="get">
+										<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-left" aria-hidden="true"></span></button>
+										<input type="hidden" name="pageNumber" value="*${pageNumber}-1"/>
+										<input type="hidden"  name="login_id" value="*${loginId}"/>
+										<input type="hidden" name="name" value="*${name}"/>
+										<input type="hidden" name="position" value="*${position}"/>
+										<input type="hidden" name="birth_date_from" value="*${birthDateFrom}"/>
+										<input type="hidden" name="birth_date_to" value="*${birthDateTo}"/>
+										<input type="hidden" name="workSituation" value="*${workSituation}"/>
+										<div th:inline="text" th:each="user : ${userList}">
+											<input type="hidden" name="userIdList[]" value="${user.id}" />
+										</div>
+									</form>
 								</div>
-								<div th:unless="${pageNumber != 1}">
-									<div></div>
-									<div></div>
-								</div>
-							<div >
-							　 ページ[[${pageNumber}]]/[[${totalPageNumber}]] 　
 							</div>
-								<div th:if="${pageNumber != totalPageNumber}">
-									<div>
-										<form action="UserList" method="get">
-											<button  role="button" type="submit" style ="color : #85919d; width : 10px ;background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-right" aria-hidden="true"></span></button>
-											<input type="hidden" name="pageNumber" value="${pageNumber+1}"/>
-											<input type="hidden"  name="login_id" value="${login_id}"/>
-											<input type="hidden" name="name" value="${name}"/>
-											<input type="hidden" name="position" value="${position}"/>
-											<input type="hidden" name="birth_date_from" value="${birth_date_from}"/>
-											<input type="hidden" name="birth_date_to" value="${birth_date_to}"/>
-											<input type="hidden" name="workSituation" value="${workSituation}"/>
-											<div th:inline="text" th:each="user : ${userList}">
-												<input type="hidden" name="userIdList[]" value="${user.id}" />
-											</div>
-										</form>
-									</div>　
-									<div >
-										<form action="UserList" method="get">
-											<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-double-right" aria-hidden="true"></span></button>
-											<input type="hidden" name="pageNumber" value="${totalPageNumber}"/>
-											<input type="hidden"  name="login_id" value="${login_id}"/>
-											<input type="hidden" name="name" value="${name}"/>
-											<input type="hidden" name="position" value="${position}"/>
-											<input type="hidden" name="birth_date_from" value="${birth_date_from}"/>
-											<input type="hidden" name="birth_date_to" value="${birth_date_to}"/>
-											<input type="hidden" name="workSituation" value="${workSituation}"/>
-											<div th:inline="text" th:each="user : ${userList}">
-												<input type="hidden" name="userIdList[]" value="${user.id}" />
-											</div>
-										</form>
-									</div>
-								</div>
-								<div th:unless="${pageNumber != totalPageNumber}">
-									<div></div>
-									<div></div>
-								</div>
 						</div>
+						<div th:unless="${pageNumber != 1}">
+							<div></div>
+							<div></div>
+						</div>
+						<div >
+							<div th:inline="text">　 ページ[[${pageNumber}]]/[[${totalPageNumber}]]　</div>
+						</div>
+						<div th:if="${pageNumber != totalPageNumber}">
+							<div class="wrapper">
+								<div>
+									<form action="UserList" method="get">
+										<button  role="button" type="submit" style ="color : #85919d; width : 10px ;background-color : rgb(249, 249, 249); border-style: none;">
+											<span class="icon-angle-right" aria-hidden="true"></span>
+										</button>
+										<input type="hidden" name="pageNumber" th:value="${pageNumber}+1"/>
+										<input type="hidden"  name="login_id" th:value="${loginId}"/>
+										<input type="hidden" name="name" th:value="${name}"/>
+										<input type="hidden" name="position" th:value="${position}"/>
+										<input type="hidden" name="birth_date_from" th:value="${birthDateFrom}"/>
+										<input type="hidden" name="birth_date_to" th:value="${birthDateTo}"/>
+										<input type="hidden" name="workSituation" th:value="${workSituation}"/>
+										<div th:inline="text" th:each="user : ${userList}">
+											<input type="hidden" name="userIdList[]" th:value="${user.id}" />
+										</div>
+									</form>
+								</div>　
+								<div>
+									<form action="UserList" th:object="${userListForm}" method="get">
+										<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-double-right" aria-hidden="true"></span></button>
+										<input type="hidden" name="pageNumber" value="${totalPageNumber}"/>
+										<input type="hidden"  name="login_id" value="${loginId}"/>
+										<input type="hidden" name="name" value="${name}"/>
+										<input type="hidden" name="position" value="${position}"/>
+										<input type="hidden" name="birth_date_from" value="${birthDateFrom}"/>
+										<input type="hidden" name="birth_date_to" value="${birthDateTo}"/>
+										<input type="hidden" name="workSituation" value="${workSituation}"/>
+										<div th:inline="text" th:each="user : ${userList}">
+											<input type="hidden" name="userIdList[]" value="${user.id}" />
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+						<div th:unless="${pageNumber != totalPageNumber}">
+							<div></div>
+							<div></div>
+						</div>
+					</div>
 					<form name="form1" action="UserDelete" method="get">
 						<div class="wrapper">
 							<div>
@@ -220,11 +225,8 @@
 								<button class="btn btn-danger" type="submit">選択したユーザーを削除</button>
 								<a class="btn btn-danger" href="UserDelete?id=all">全ユーザーを削除</a>
 							</div>
-						 </div>
-							<br/><br/>
-
+						</div><br/><br/>
 						<div class="row">
-
 							<div class="table-responsive">
 								<table class="table table-striped">
 									<thead>
@@ -239,83 +241,92 @@
 										</tr>
 									</thead>
 									<tbody>
-											<div th:if="${userNumberPerPage * pageNumber &lt;= userList.size()}">
-												<tr th:each="seq, stat : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userNumberPerPage * pageNumber-1)}">
-														<td></td>
-														<td><input type="checkbox" name="delListId[]" value="${userList.get(stat.index).getId()}" onClick="DisChecked();"/></td>
-														<td>${userList.get(stat.index).getLoginId()}</td>
-														<td>${userList.get(stat.index).getName()}</td>
-														<td>${userList.get(stat.index).getFormatBirthDate()}</td>
-															<div th:if="${!UtilLogic.isWorking(userList.get(stat.index).getLoginId(), workSituationRepository)}">
-																<td>帰宅
-																	<p th:if="${UtilLogic.stringTimeToInt(UtilLogic.totalOvertime(WorkSituationDao.findAll(userList.get(stat.index).getLoginId(), year, month))) >= 500000}">
-																		<font size="3" color="red">　残業時間超過</font>
-																	</p>
-																</td>
-															</div>
-															<div th:unless="${!UtilLogic.isWorking(userList.get(stat.index).getLoginId(), workSituationRepository)}">
-																<td>勤務中
-																	<p th:if="${UtilLogic.stringTimeToInt(UtilLogic.totalOvertime(WorkSituationDao.findAll(userList.get(stat.index).getLoginId(), year, month))) >= 500000}">
-																		<font size="3" color="red">　残業時間超過</font>
-																	</p>
-																</td>
-															</div>
-														<td>
-															<a class="btn btn-primary" href="UserDetail?id=${userList.get(stat.index).getId()}">詳細</a>
-															<a class="btn btn-success" href="UserUpdate?id=${userList.get(stat.index).getId()}">更新</a>
-															<a class="btn btn-danger" href="UserDelete?id=${userList.get(stat.index).getId()}">削除</a>
-														</td>
-													</tr>
-											</div>
-											<div th:unless="${userNumberPerPage * pageNumber &lt;= userList.size()}">
-													<tr th:each="seq, stat : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userList.size() - 1)}">
-														<td></td>
-														<td><input type="checkbox" name="delListId[]" value="*${userList.get(stat.index).getId()}" onClick="DisChecked();"/></td>
-														<td>${userList.get(stat.index).getLoginId()}</td>
-														<td>${userList.get(stat.index).getName()}</td>
-														<td>${userList.get(stat.index).getFormatBirthDate()}</td>
-															<p th:if="${!UtilLogic.isWorking(userList.get(stat.index).getLoginId(), workSituationRepository)}">
-																<td>帰宅
-																	<c:if test="${UtilLogic.stringTimeToInt(UtilLogic.totalOvertime(WorkSituationDao.findAll(userList.get(stat.index).getLoginId(), year, month))) >= 500000}">
-																		<font size="3" color="red">　残業時間超過</font>
-																	</c:if>
-																</td>
-															</p>
-															<p th:unless="${!UtilLogic.isWorking(userList.get(stat.index).getLoginId(), workSituationRepository)}">
-																<td>勤務中
-																	<c:if test="${UtilLogic.stringTimeToInt(UtilLogic.totalOvertime(WorkSituationDao.findAll(userList.get(stat.index).getLoginId(), year, month))) >= 500000}">
-																		<font size="3" color="red">　残業時間超過</font>
-																	</c:if>
-																</td>
-															</p>
-														<td>
-															<a class="btn btn-primary" href="UserDetail?id=${userList.get(stat.index).getId()}">詳細</a>
-															<a class="btn btn-success" href="UserUpdate?id=${userList.get(stat.index).getId()}">更新</a>
-															<a class="btn btn-danger" href="UserDelete?id=${userList.get(stat.index).getId()}">削除</a>
-														</td>
-													</tr>
-											</div>
+										<div th:if="${userNumberPerPage * pageNumber &lt;= userList.size()}">
+											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userNumberPerPage * pageNumber-1)}">
+												<td></td>
+												<td>
+													<input type="checkbox" name="delListId[]" value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
+												</td>
+												<td>
+													<div th:inline="text">[[${userList.get(seq).getLoginId()}]]</div>
+												</td>
+												<td>
+													<div th:inline="text">[[${userList.get(seq).getName()}]]</div>
+												</td>
+												<td>
+													<div th:inline="text">[[${userList.get(seq).getFormatBirthDate()}]]</div>
+												</td>
+												<div th:if="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
+													<td>帰宅
+														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
+															<font size="3" color="red">　残業時間超過</font>
+														</p>
+													</td>
+												</div>
+												<div th:unless="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
+													<td>勤務中
+														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
+															<font size="3" color="red">　残業時間超過</font>
+														</p>
+													</td>
+												</div>
+												<td>
+													<a class="btn btn-primary" th:href="'UserDetail?id=' + ${userList.get(seq).getId()}">詳細</a>
+													<a class="btn btn-success" th:href="'UserUpdate?id=' + ${userList.get(seq).getId()}">更新</a>
+													<a class="btn btn-danger" th:href="'UserDelete?id=' + ${userList.get(seq).getId()}">削除</a>
+												</td>
+											</tr>
+										</div>
+										<div th:unless="${userNumberPerPage * pageNumber &lt;= userList.size()}">
+											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userList.size() - 1)}">
+												<td></td>
+												<td>
+													<input type="checkbox" name="delListId[]" value="*${userList.get(seq).getId()}" onClick="DisChecked();"/>
+												</td>
+												<td>[[${userList.get(seq).getLoginId()}]]</td>
+												<td>[[${userList.get(seq).getName()}]]</td>
+												<td>[[${userList.get(seq).getFormatBirthDate()}]]</td>
+												<p th:if="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
+													<td>帰宅
+														<c:if test="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
+															<font size="3" color="red">　残業時間超過</font>
+														</c:if>
+													</td>
+												</p>
+												<p th:unless="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
+													<td>勤務中
+														<c:if test="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
+															<font size="3" color="red">　残業時間超過</font>
+														</c:if>
+													</td>
+												</p>
+												<td>
+													<a class="btn btn-primary" th:href="'UserDetail?id=' + ${userList.get(seq).getId()}">詳細</a>
+													<a class="btn btn-success" th:href="'UserUpdate?id=' + ${userList.get(seq).getId()}">更新</a>
+													<a class="btn btn-danger" th:href="'UserDelete?id=' + ${userList.get(seq).getId()}">削除</a>
+												</td>
+											</tr>
+										</div>
 									</tbody>
 								</table>
 							</div>
 						</div>
 					</form>
-					<font size="3" color="red">${salaryErrMsg}</font><br/>
+					<font size="3" color="red"><div th:text="${salaryErrMsg}" /></font><br/>
 					<form action="OutputCSV" method="post">
-					<div class="col-sm-3" style="width: 220px">
-						<input type="month" class="form-control" name="yearAndMonth" style="background: white; height: 35px; width: 200px;"/>
-					</div>
-					の全ユーザーの月給をcsvファイルに
-					<button class="btn btn-warning" type="submit">出力</button>
+						<div class="col-sm-3" style="width: 220px">
+							<input type="month" class="form-control" name="yearAndMonth" style="background: white; height: 35px; width: 200px;"/>
+						</div>
+						の全ユーザーの月給をcsvファイルに
+						<button class="btn btn-warning" type="submit">出力</button>
 					</form>
 				</div>
 			</section>
 		</div>
 
-		<!-- 共通footer.jsp読み込み-->
-		<jsp:include page="footer.jsp" />
-
-		<script type="text/javascript" src="/AttendanceRecord/jsp/js/delListGet.js"></script>
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
+		<script type="text/javascript" src="/js/delListGet.js"></script>
 	</body>
 
 </html>

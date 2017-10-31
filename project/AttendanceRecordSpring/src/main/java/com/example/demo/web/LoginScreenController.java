@@ -9,7 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import com.example.demo.common.UtilLogic;
 import com.example.demo.form.LoginScreenForm;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.validation.LoginScreenValidator;
 
 @RequestMapping("/LoginScreen")
 @Controller
@@ -25,6 +28,13 @@ public class LoginScreenController {
 
 	@Autowired
 	HttpSession session;
+	@Autowired
+	LoginScreenValidator loginScreenValidator;
+
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.addValidators(loginScreenValidator);
+	}
 
 	@GetMapping
 	public String get(@ModelAttribute LoginScreenForm loginScreenForm, Model model) {
@@ -35,7 +45,7 @@ public class LoginScreenController {
 			// セッションにログイン情報がないときはloginScreen.htmlへフォワード
 			return "loginScreen";
 		} else {
-			if(loginUser.getId() == 1) {
+			if (loginUser.getId() == 1) {
 				// ログインユーザーが管理者のとき、UserListへリダイレクト
 				return "redirect:/UserList";
 			} else {
@@ -70,23 +80,16 @@ public class LoginScreenController {
 		// ユーザーを探し出し、userInfoに代入
 		User userInfo = userRepository.findByLoginIdIsAndPasswordIs(loginId, encPass);
 
-		// ログインができるかできないかを判断
-		if (userInfo == null) {
-			model.addAttribute("errMsg", "ログインIDまたはパスワードが異なります");
-			return get(loginScreenForm, model);
+		// セッションスコープにインスタスを保存
+		session.setAttribute("loginUser", userInfo);
+
+		// 管理者か一般ユーザーかで分岐
+		if (userInfo.getId() == 1) {
+			// UserListへリダイレクト
+			return "redirect:/UserList";
 		} else {
-
-			// セッションスコープにインスタスを保存
-			session.setAttribute("loginUser", userInfo);
-
-			// 管理者か一般ユーザーかで分岐
-			if (userInfo.getId() == 1) {
-				// UserListへリダイレクト
-				return "redirect:/UserList";
-			} else {
-				// WorkSituationRegistrationへリダイレクト
-				return "redirect:/WorkSituationRegistration";
-			}
+			// WorkSituationRegistrationへリダイレクト
+			return "redirect:/WorkSituationRegistration";
 		}
 
 	}

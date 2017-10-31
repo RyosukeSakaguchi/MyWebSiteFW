@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<!-- 共通header.html読み込み-->
+		<div th:replace="header"></div>
+		<title>ユーザー情報参照</title>
+		<!-- オリジナルCSS読み込み -->
+		<link th:href="@{css/original/common.css}" rel="stylesheet"/>
+		<!-- カレンダー  -->
+		<link rel="stylesheet" type="text/css" th:href="@{css2/calendar.css}" />
+		<link rel="stylesheet" type="text/css" th:href="@{css2/custom_2.css}" />
+		<link rel="stylesheet" type="text/css" th:href="@{css2/demo.css}" />
+	</head>
+
+	<body>
+		<!-- Loader -->
+		<div id="fh5co-page">
+			<section id="fh5co-header">
+				<div class="container">
+					<nav role="navigation">
+						<ul class="pull-left left-menu">
+							<li class="fh5co-cta-btn">
+								<div class="wrapper2">
+									<div th:if="${loginUser.getId() == 1}">
+										<a th:href="UserList">戻る</a>
+									</div>
+									<div th:unless="${loginUser.getId() == 1}">
+										<a th:href="WorkSituationRegistration">戻る</a>
+									</div>
+									<div>
+										　　<a th:href="'UserUpdate?id=' + ${user.getId()}">更新</a>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</section>
+
+			<section id="fh5co-hero" class="no-js-fullheight" style="background-image: url(images/full_image_2.jpg);" data-next="yes">
+				<div class="container">
+					<div class="fh5co-intro no-js-fullheight">
+						<div class="fh5co-intro-text">
+							<div class="wrapper2">
+								<div class="fh5co-left-position"><br/><br/>
+									<h2 class="animate-box">User Detail</h2>
+								</div>
+								<div class="animate-box" style="color:white">
+									<div th:inline="text">ログイン : [[${user.getLoginId()}]]</div>
+									<br/> <div th:inline="text">名前 : [[${user.getName()}]]</div>
+									<br/> <div th:inline="text">役職 : [[${user.getPosition()}]]</div>
+									<br/> <div th:inline="text">生年月日 : [[${user.getFormatBirthDate()}]]</div>
+									<br/> <div th:inline="text">登録日時 : [[${user.getFormatCreateDate()}]]</div>
+									<br/> <div th:inline="text">更新日時 : [[${user.getFormatUpdateDate()}]]</div>
+									<br/>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section id="fh5co-features">
+				<div class="container">
+					<form name="form1" action="WorkSituationEditHistory" method="get">
+					<input type="hidden" name="id" th:value="${user.getId()}"/>
+					<input type="hidden" name="disp" value="5"/>
+					<div class="button_wrapper" style="text-align:left;">
+						<button class="btn btn-default" style="border: 2px solid black;">勤務状況編集履歴</button>
+					</div>
+					</form>
+					<div class="fh5co-center-position">
+						<div class="fh5co-lead animate-box fadeInUp animated" aline="center">Calendar</div><br/>
+					</div>
+					<div class="custom-calendar-wrap">
+						<div id="custom-inner" class="custom-inner">
+						<form action="DailyWorkCheck" method="get">
+						<input type="hidden" name="id" value="${userInfo.getId()}"/>
+							<div class="custom-header clearfix">
+								<nav>
+									<span id="custom-prev" class="custom-prev"></span>
+									<span id="custom-next" class="custom-next"></span>
+								</nav>
+								<h2 id="custom-month" class="custom-month"></h2>
+								<h3 id="custom-year" class="custom-year"></h3>
+							</div>
+							<div id="calendar" class="fc-calendar-container"></div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
+
+		<script type="text/javascript" src="js/jquery.calendario.js"></script>
+		<script type="text/javascript" src="js/data.js"></script>
+		<script type="text/javascript" src="js/calendario-click.js"></script>
+
+	</body>
+
+</html>
+

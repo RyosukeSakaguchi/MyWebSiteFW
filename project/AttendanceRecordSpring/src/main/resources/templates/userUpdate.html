@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<!-- 共通header.html読み込み-->
+		<div th:replace="header"></div>
+		<title>ユーザー情報更新</title>
+		<!-- オリジナルCSS読み込み -->
+		<link rel="stylesheet" th:href="@{css/original/common.css}" />
+	</head>
+
+	<body>
+		<!-- Loader -->
+		<div class="fh5co-loader"></div>
+		<div id="fh5co-page">
+			<section id="fh5co-header">
+				<div class="container">
+					<nav role="navigation">
+						<ul class="pull-left left-menu">
+							<li class="fh5co-cta-btn">
+								<div th:if="${loginUser.getId() == 1}">
+									<a href="UserList">戻る</a>
+								</div>
+								<div th:unless="${loginUser.getId() == 1}">
+									<a href="WorkSituationRegistration">戻る</a>
+								</div>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</section>
+
+			<section id="fh5co-hero" style="background-image: url(images/full_image_2.jpg); height: 700px;" data-next="yes">
+				<div class="fh5co-overlay"></div>
+				<div class="container">
+					<div class="fh5co-intro " style="height: 750px">
+						<div class="fh5co-intro-text">
+							<div class="wrapper2">
+								<div class="fh5co-left-position"><br/><br/><br/><br/>
+									<h2 class="animate-box">User Update</h2>
+									<div th:object="${userUpdateForm}">
+										<font color="red" size="3">
+												<span th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span><br/>
+												<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span><br/>
+												<span th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></span><br/>
+										</font>
+									</div>
+								</div>
+								<div class="fh5co-right-position">
+									<form th:action="@{/UserUpdate}" th:object="${userUpdateForm}" method="post">
+										<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">ログインID</label>
+										<div class="col-sm-3">
+											<div th:inline="text">[[${user.getLoginId()}]]</div>
+										</div><br/><br/>
+										<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">ユーザー名</label>
+										<div class="col-sm-3">
+											<input type="text" class="form-control" id="inputName" th:value="${user.getName()}" name="name"
+											onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+										</div>
+										<br/><br/>
+										<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">パスワード</label>
+										<div class="col-sm-3">
+											<input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+											 title="8文字以上で1文字以上の数字、小文字アルファベット、大文字アルファベットがそれぞれ含まれていること"
+											 class="form-control" id="inputName" name="password" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+										</div>
+										<br/><br/>
+										<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">パスワード(確認)</label>
+										<div class="col-sm-3">
+											<input type="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+											title="8文字以上で1文字以上の数字、小文字アルファベット、大文字アルファベットがそれぞれ含まれていること"
+											class="form-control" id="inputName" name="passwordConf" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+										</div>
+										<br/><br/>
+										<label for="inputName" class="col-sm-2 control-label" style="width: 200px;"> 役職</label>
+										<div class="col-sm-3">
+											<select class="form-control" id="inputName" name="position"  style="background: white; height: 35px; width: 200px;">
+												<tr th:each="position : ${positionList}">
+													<div th:if="${position.position.equals(user.position)}">
+														<div th:inline="text">
+															<option th:value="${position.position}" selected="selected" >[[${position.position}]]</option>
+														</div>
+													</div>
+													<div th:unless="${position.position.equals(user.position)}">
+														<div th:inline="text">
+															<option th:value="${position.position}">[[${position.position}]]</option>
+														</div>
+													</div>
+												</tr>
+											</select>
+										</div>
+										<br/><br/>
+										<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">誕生日</label>
+										<div class="col-sm-3">
+											<input type="date" class="form-control" id="inputName" name="birthDate" onblur="isEmpty(this)" th:value="${user.getBirthDate()}" style="background: white; height: 35px; width: 200px;"/>
+										</div>
+										<br/> <br/> <br/>
+										<input type="hidden" th:value="${user.id}" name="id"/>
+										<div class="button_wrapper">
+											<button class="btn btn-info" type="submit">登録</button>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</div>
+
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
+
+	</body>
+
+</html>
+

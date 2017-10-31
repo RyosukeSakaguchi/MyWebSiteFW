@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<!-- 共通header.html読み込み-->
+		<div th:replace="header"></div>
+		<title>勤務状況編集履歴</title>
+		<!-- オリジナルCSS読み込み -->
+		<link th:href="@{css/original/common.css}" rel="stylesheet"/>
+	</head>
+
+	<body>
+
+		<div id="fh5co-page" style="width:95%">
+			<ul class="pull-left left-menu">
+				<br/>　　　　　<a class="btn btn-default" style="border: 2px solid black;" th:href="'UserDetail?id=' + ${user.getId()}">戻る</a>
+			</ul>
+			<ul class="pull-right center-right">
+				<br/><a class="btn btn-default" style="border: 2px solid black;" th:href="Logout">ログアウト</a>
+			</ul>
+		</div>
+
+		<section id="fh5co-projects">
+			<div class="fh5co-overlay"></div>
+			<div class="container" style="width: 100%;">
+				<div style="text-align: center;">${name}の編集履歴${dispMsg}</div><br/><br/>
+				<div class="fh5co-intro js-fullheight">
+					<div class="fh5co-intro-text">
+						<div class="fh5co-center-position">
+							<div class="container" style="width: 90%;">
+								<div class="row">
+									<div>
+										<table class="table table-striped">
+											<thead>
+												<tr>
+													<th style="text-align: center;">編集日時</th>
+													<th style="text-align: center;">編集内容</th>
+												</tr>
+											</thead>
+											<tbody>
+												<div th:if="${result}">
+													<div th:if="${workSituationEditList.size() &lt; 20}">
+														<c:forEach var="obj" items="${workSituationEditList}"  >
+															<tr>
+																<td style="text-align: center;">${obj.getFormatEditDate()}</td>
+																<td style="text-align: center;">${obj.getEditContent()}</td>
+															</tr>
+														</c:forEach>
+													</div>
+													<div th:unless="${workSituationEditList.size() &lt; 20}">
+														<c:forEach var="i" begin="0" end="19"  >
+															<tr>
+																<td style="text-align: center;">${workSituationEditList.get(i).getFormatEditDate()}</td>
+																<td style="text-align: center;">${workSituationEditList.get(i).getEditContent()}</td>
+															</tr>
+														</c:forEach>
+													</div>
+												</div>
+												<div th:unless="${result}">
+													<div th:if="${workSituationEditList.size() &lt; 5}">
+														<c:forEach var="obj" items="${workSituationEditList}"  >
+															<tr>
+																<td style="text-align: center;">${obj.getFormatEditDate()}</td>
+																<td style="text-align: center;">${obj.getEditContent()}</td>
+															</tr>
+														</c:forEach>
+													</div>
+													<div th:unless="${workSituationEditList.size() &lt; 5}">
+														<c:forEach var="i" begin="0" end="4">
+															<tr>
+																<td style="text-align: center;">${workSituationEditList.get(i).getFormatEditDate()}</td>
+																<td style="text-align: center;">${workSituationEditList.get(i).getEditContent()}</td>
+															</tr>
+														</c:forEach>
+													</div>
+												</div>
+											</tbody>
+										</table><br/><br/>
+										<div class="button_wrapper" >
+											<div th:if="${result}">
+												<a class="btn btn-primary" th:href="'WorkSituationEditHistory?id=' + ${user.getId()}" >最新5件を表示</a><br/>
+											</div>
+											<div th:unless="${result}">
+												<a class="btn btn-primary" th:href="'WorkSituationEditHistory?id=' + ${user.getId()} + '&amp;disp=20'" >最新20件を表示</a><br/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
+
+	</body>
+
+</html>
+

@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -58,6 +59,11 @@ public class User {
 		return position;
 	}
 
+	public String getFormatBirthDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+		return sdf.format(birthDate);
+	}
+
 	public void setPosition(String position) {
 		this.position = position;
 	}
@@ -78,8 +84,18 @@ public class User {
 		this.createDate = createDate;
 	}
 
+	public String getFormatCreateDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日　HH時mm分ss秒");
+		return sdf.format(createDate);
+	}
+
 	public Timestamp getUpdateDate() {
 		return updateDate;
+	}
+
+	public String getFormatUpdateDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日　HH時mm分ss秒");
+		return sdf.format(updateDate);
 	}
 
 	public void setUpdateDate(Timestamp updateDate) {

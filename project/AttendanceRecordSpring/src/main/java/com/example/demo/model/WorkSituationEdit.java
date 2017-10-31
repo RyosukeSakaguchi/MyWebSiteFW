@@ -14,7 +14,7 @@ public class WorkSituationEdit {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	private String loginId;
-	private Timestamp editDate;
+	private Timestamp editTime;
 	private String editContent;
 
 	public int getId() {
@@ -29,17 +29,17 @@ public class WorkSituationEdit {
 	public void setLoginId(String loginId) {
 		this.loginId = loginId;
 	}
-	public Timestamp getEditDate() {
-		return editDate;
-	}
-	public void setEditDate(Timestamp editDate) {
-		this.editDate = editDate;
-	}
 	public String getEditContent() {
 		return editContent;
 	}
 	public void setEditContent(String editContent) {
 		this.editContent = editContent;
+	}
+	public Timestamp getEditTime() {
+		return editTime;
+	}
+	public void setEditTime(Timestamp editTime) {
+		this.editTime = editTime;
 	}
 
 }

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.example.demo.model.SalaryMaster;
 import com.example.demo.model.User;
 import com.example.demo.model.WorkSituation;
-import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkSituationRepository;
 
 import dao.SalaryMasterDao;
@@ -468,9 +467,5 @@ public class UtilLogic {
 		return false;
 	}
 
-	public static List<User> searchUser(String loginId, String userName, String position, String birthDateFrom,
-			String birthDateTo, String workSituation, UserRepository userRepository, WorkSituationRepository workSituationRepository){
-		List<User> userList = new ArrayList<User>();
-		userList = userRepository.findByLoginIdIsAndNameContainingAndPositionIsAndBirthDateFromGreaterThanEqualsAndBirthDateToLessThanEquals(loginId, userName, position, Date.valueOf(birthDateFrom), Date.valueOf(birthDateTo));
-	}
+
 }
