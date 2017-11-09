@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -41,6 +42,11 @@ public class WorkSituation {
 
 	public Date getCreateDate() {
 		return createDate;
+	}
+
+	public String getFormatCreateDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd");
+		return sdf.format(this.createDate);
 	}
 
 	public void setCreateDate(Date createDate) {

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<!-- 共通header.html読み込み-->
+		<div th:replace="header"></div>
+		<title>月別勤務状況</title>
+		<!-- オリジナルCSS読み込み -->
+		<link th:href="@{css/original/common.css}" rel="stylesheet"/>
+	</head>
+
+	<body>
+		<div id="fh5co-page" style="width:95%">
+			<ul class="pull-left left-menu">
+				<br/>　　　　　<a class="btn btn-default" style="border: 2px solid black;" th:href="'UserDetail?id=' + ${user.getId()}">戻る</a>
+			</ul>
+			<ul class="pull-right center-right">
+				<br/><a class="btn btn-default" style="border: 2px solid black;" href="Logout">ログアウト</a>
+			</ul>
+		</div>
+
+		<section id="fh5co-projects">
+			<div class="fh5co-overlay"></div><br/>
+			<div class="container" style="width: 100%;">
+				<div style="text-align: center;" th:inline="text">[[${year}]]年[[${month}]]月 [[${name}]]</div><br/>
+					<div align="center">
+						<br/><font size="5" color="red">${errMsg}</font><br/><br/>
+					</div>
+				<div class="fh5co-intro js-fullheight">
+					<div class="fh5co-intro-text">
+						<div class="fh5co-center-position">
+							<div class="container" style="width: 90%;">
+								<div class="row">
+									<div>
+										<div class="wrapper">
+											<div>
+												<a class="btn btn-danger" th:href="'WorkSituationDelete?id=' + ${user.getId()} + '&amp;year=' + ${year} + '&amp;month=' + ${month}">All Delete</a>
+											</div>
+											<div>
+												<form action="OutputCSV" method="post">
+													<button class="btn btn-warning" type="submit">csvに出力</button>
+													<input type="hidden" th:value="${user.getId()}" name="id"/>
+													<input type="hidden" th:value="${year}" name="year"/>
+													<input type="hidden" th:value="${month}" name="month"/>
+												</form>
+											</div>
+										</div><br/>
+										<table class="table table-striped">
+											<thead>
+												<tr>
+													<th style="text-align: center;">day</th>
+													<th style="text-align: center;">勤務状況</th>
+													<th style="text-align: center;">勤務開始時間</th>
+													<th style="text-align: center;">勤務終了時間</th>
+													<th style="text-align: center;">休憩時間</th>
+													<th style="text-align: center;">勤務時間</th>
+													<th style="text-align: center;">残業時間</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:each="workSituation : ${workSituationList}">
+													<td style="text-align: center;" th:text="${workSituation.getFormatCreateDate()}"></td>
+													<td style="text-align: center;" th:text="${workSituation.workSitu}"></td>
+													<td style="text-align: center;" th:text="${workSituation.workStart}"></td>
+													<td style="text-align: center;" th:text="${workSituation.workEnd}"></td>
+													<td style="text-align: center;" th:text="${workSituation.breakTime}"></td>
+													<td style="text-align: center;" th:text="${workSituation.workTime}"></td>
+													<td style="text-align: center;" th:text="${workSituation.overtime}"></td>
+												</tr>
+												<tr>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td style="text-align: center;" th:inline="text">総勤務時間 [[${titalWorkTime}]]</td>
+													<td style="text-align: center;" th:inline="text">総残業時間 [[${titalOvertime}]]</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
+
+	</body>
+
+</html>
+

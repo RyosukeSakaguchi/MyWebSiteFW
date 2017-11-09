@@ -24,10 +24,6 @@ public class UserUpdateValidator implements Validator {
 		String password = userUpdateForm.getPassword();
 		String passwordConf = userUpdateForm.getPasswordConf();
 
-		if (password == "" || passwordConf == "") {
-			// must be checked by @NotNull
-			return;
-		}
 		if (!password.equals(passwordConf)) {
 			errors.rejectValue("password", "PasswordEqualsValidator.signUpForm.password", "・パスワードとパスワード(確認)が異なります");
 		}
@@ -50,6 +46,7 @@ public class UserUpdateValidator implements Validator {
 		}
 
 		if (birthDateDate.compareTo(now) == 1) {
+
 			errors.rejectValue("birthDate", null, "・生年月日が正しくありません");
 		}
 

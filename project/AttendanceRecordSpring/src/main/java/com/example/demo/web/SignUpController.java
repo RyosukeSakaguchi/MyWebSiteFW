@@ -32,14 +32,15 @@ import com.example.demo.validation.SignUpValidator;
 @RequestMapping("/SignUp")
 @Controller
 public class SignUpController {
-	@Autowired
-	SignUpValidator signUpValidator;
+
 	@Autowired
 	HttpSession session;
 	@Autowired
 	private PositionRepository positionRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	SignUpValidator signUpValidator;
 
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {

@@ -50,6 +50,7 @@ public class UserListController {
 			// WorkSituationRegistrationへリダイレクト
 			return "redirect:/WorkSituationRegistration";
 		} else {
+
 			// 1ページ毎に表示するユーザー数を5ユーザーにする
 			int userNumberPerPage = 5;
 

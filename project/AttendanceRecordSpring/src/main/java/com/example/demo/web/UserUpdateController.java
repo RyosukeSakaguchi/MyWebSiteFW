@@ -41,7 +41,6 @@ public class UserUpdateController {
 	@Autowired
 	private UserRepository userRepository;
 
-
 	@InitBinder("userUpdateForm")
 	public void initBinder(WebDataBinder binder) {
 		binder.addValidators(userUpdateValidator);
@@ -65,7 +64,6 @@ public class UserUpdateController {
 			user = userRepository.findByIdIs(id);
 			model.addAttribute("user", user);
 
-
 			List<PositionMaster> positionList = positionRepository.findAll();
 			// リクエストパラメーターを保存
 			model.addAttribute("positionList", positionList);
@@ -84,13 +82,12 @@ public class UserUpdateController {
 			return get(userUpdateForm.getId(), userUpdateForm, model);
 		}
 
-
 		// リクエストパラメータの取得
 		int id = userUpdateForm.getId();
 		String password = userUpdateForm.getPassword();
 		String name = userUpdateForm.getName();
 		String birthDate = userUpdateForm.getBirthDate();
-		String position = userUpdateForm.getPassword();
+		String position = userUpdateForm.getPosition();
 
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -104,10 +101,29 @@ public class UserUpdateController {
 
 		if (password.length() == 0) {
 			// ユーザー情報を更新
-			userRepository.setFixedNameAndPositionAndBirthDateAndUpdateDateFor(name, position, Date.valueOf(birthDate), now, id);
+			User user = new User();
+			user.setId(id);
+			user.setLoginId(userRepository.findByIdIs(id).getLoginId());
+			user.setName(name);
+			user.setPosition(position);
+			user.setBirthDate(Date.valueOf(birthDate));
+			user.setPassword(userRepository.findByIdIs(id).getPassword());
+			user.setCreateDate(userRepository.findByIdIs(id).getCreateDate());
+			user.setUpdateDate(now);
+			userRepository.save(user);
+
 		} else {
 			// ユーザー情報を更新
-			userRepository.setFixedNameAndPositionAndBirthDateAndPasswordAndUpdateDateFor(name, position, Date.valueOf(birthDate), encPass, now, id);
+			User user = new User();
+			user.setId(id);
+			user.setLoginId(userRepository.findByIdIs(id).getLoginId());
+			user.setName(name);
+			user.setPosition(position);
+			user.setBirthDate(Date.valueOf(birthDate));
+			user.setPassword(encPass);
+			user.setCreateDate(userRepository.findByIdIs(id).getCreateDate());
+			user.setUpdateDate(now);
+			userRepository.save(user);
 		}
 
 		List<PositionMaster> positionList = positionRepository.findAll();

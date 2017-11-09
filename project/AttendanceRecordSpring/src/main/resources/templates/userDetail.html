@@ -74,8 +74,8 @@
 					</div>
 					<div class="custom-calendar-wrap">
 						<div id="custom-inner" class="custom-inner">
-						<form action="DailyWorkCheck" method="get">
-						<input type="hidden" name="id" value="${userInfo.getId()}"/>
+						<form th:action="@{DailyWorkCheck}" method="get">
+						<input type="hidden" name="id" th:value="${user.getId()}"/>
 							<div class="custom-header clearfix">
 								<nav>
 									<span id="custom-prev" class="custom-prev"></span>

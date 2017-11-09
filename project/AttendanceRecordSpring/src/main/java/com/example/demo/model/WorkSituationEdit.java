@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -37,6 +38,10 @@ public class WorkSituationEdit {
 	}
 	public Timestamp getEditTime() {
 		return editTime;
+	}
+	public String getFormatEditTime() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH時mm分ss秒");
+		return sdf.format(this.editTime);
 	}
 	public void setEditTime(Timestamp editTime) {
 		this.editTime = editTime;

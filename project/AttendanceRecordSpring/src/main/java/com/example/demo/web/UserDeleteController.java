@@ -10,9 +10,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.demo.form.UserDeleteForm;
 import com.example.demo.form.UserListForm;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
@@ -43,9 +45,8 @@ public class UserDeleteController {
 				// チェックをつけていないメッセージをリクエストスコープに保存
 				model.addAttribute("noCheckMsg", "未選択です");
 
-
 				// UserListへリダイレクト
-				return "redirect:/UserList";
+//				return "redirect:/UserList";
 //				// UserListのdoGetメソッドを実行
 //				UserListController userList = new UserListController();
 //				userList.get(userListForm, model);
@@ -84,7 +85,60 @@ public class UserDeleteController {
 			// userDelete.htmlへフォワード
 			return "userDelete";
 		}
+	}
 
+	@PostMapping
+	public String post(@ModelAttribute UserDeleteForm userDeleteForm, Model model) {
+
+		// リクエストスコープにパラメーターがあるかで分岐
+		if (String.valueOf(userDeleteForm.getId()).length() == 0) {
+
+			// パラメータがnullかそうでないかで分岐
+			if (userDeleteForm.getIdList() != null) {
+
+				// 消去するユーザーのidリストに対応する勤務状況と勤務状況編集履歴とユーザー情報を削除
+				int[] idList = userDeleteForm.getIdList();
+				for (int i = 0; i < idList.length; i++) {
+					User user = new User();
+//					user = userRepository.findByIdIs(idList[i]);
+//					WorkSituationDao.userSituDel(user.getLoginId());
+//					WorkSituationEditDao.userSituEditDel(user.getLoginId());
+//					UserInfoDao.userDel(idList[i]);
+
+					// ユーザー消去成功のメッセージをリクエストスコープに保存
+					model.addAttribute("sucMsg", "ユーザー情報の削除に成功しました");
+
+				}
+			} else {
+//				// 全ての勤務状況と勤務状況編集履歴とユーザー情報を削除
+//				WorkSituationDao.allUserSituDel();
+//				WorkSituationEditDao.allUserSituEditDel();
+//				UserInfoDao.allUserDel();
+
+				// ユーザー消去成功のメッセージをリクエストスコープに保存
+				model.addAttribute("sucMsg", "全ユーザー情報の削除に成功しました");
+			}
+
+//			// UserListのdoGetメソッドを実行
+//			UserList userList = new UserList();
+//			userList.doGet(request, response);
+//			return;
+		} else {
+
+			// 消去するユーザーのidに対応する勤務状況と勤務状況編集履歴とユーザー情報を削除
+			User user = new User();
+			user = userRepository.findByIdIs(userDeleteForm.getId());
+//			WorkSituationDao.userSituDel(user.getLoginId());
+//			WorkSituationEditDao.userSituEditDel(user.getLoginId());
+//			UserInfoDao.userDel(userDeleteForm.getId());
+
+			// ユーザー消去成功のメッセージをリクエストスコープに保存
+			model.addAttribute("sucMsg", "ユーザー情報の削除に成功しました");
+
+//			// UserListのdoGetメソッドを実行
+//			UserList userList = new UserList();
+//			userList.doGet(request, response);
+		}
 	}
 
 }

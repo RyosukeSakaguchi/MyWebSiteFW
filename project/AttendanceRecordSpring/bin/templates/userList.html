@@ -177,16 +177,16 @@
 						<div th:if="${pageNumber != totalPageNumber}">
 							<div class="wrapper">
 								<div>
-									<form action="UserList" method="get">
+									<form th:action="@{/UserList}" method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px ;background-color : rgb(249, 249, 249); border-style: none;">
 											<span class="icon-angle-right" aria-hidden="true"></span>
 										</button>
 										<input type="hidden" name="pageNumber" th:value="${pageNumber}+1"/>
-										<input type="hidden"  name="login_id" th:value="${loginId}"/>
+										<input type="hidden"  name="loginId" th:value="${loginId}"/>
 										<input type="hidden" name="name" th:value="${name}"/>
 										<input type="hidden" name="position" th:value="${position}"/>
-										<input type="hidden" name="birth_date_from" th:value="${birthDateFrom}"/>
-										<input type="hidden" name="birth_date_to" th:value="${birthDateTo}"/>
+										<input type="hidden" name="birthDateFrom" th:value="${birthDateFrom}"/>
+										<input type="hidden" name="birthDateTo" th:value="${birthDateTo}"/>
 										<input type="hidden" name="workSituation" th:value="${workSituation}"/>
 										<div th:inline="text" th:each="user : ${userList}">
 											<input type="hidden" name="userIdList[]" th:value="${user.id}" />

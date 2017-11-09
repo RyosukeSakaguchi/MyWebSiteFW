@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -458,13 +459,101 @@ public class UtilLogic {
 
 		WorkSituation WorkSituation = workSituationRepository.findByLoginIdIsAndCreateDateIs(loginId, today);
 
-		if(WorkSituation != null) {
-			if(WorkSituation.getWorkSitu().length() == 2) {
+		if (WorkSituation != null) {
+			if (WorkSituation.getWorkSitu().length() == 2) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	public static void workStart(String loginId, Time workStartMaster,
+			WorkSituationRepository workSituationRepository) {
+
+		// 今日の日付を時間を取得
+		Date today = new Date(Calendar.getInstance().getTimeInMillis());
+		Time now = new Time(Calendar.getInstance().getTimeInMillis());
+
+		// Time型の今の時刻nowと時間マスターテーブルの勤務開始時間workStartMasterをint型にする
+		int nowInt = UtilLogic.timeToInt(now);
+		int workStartMasterInt = UtilLogic.timeToInt(workStartMaster);
+
+		// 現在の時刻と時間マスターテーブルの勤務開始時間を比べ遅刻したか、通常の出席で分岐
+		String workSitu;
+		if (nowInt > workStartMasterInt) {
+			workSitu = "遅刻";
+		} else {
+			workSitu = "出席";
+		}
+
+		WorkSituation workSituation = new WorkSituation();
+		workSituation.setLoginId(loginId);
+		workSituation.setCreateDate(today);
+		workSituation.setWorkSitu(workSitu);
+		workSituation.setWorkStart(now);
+		workSituation.setWorkEnd(Time.valueOf("00:00:00"));
+		workSituation.setBreakTime(Time.valueOf("00:00:00"));
+		workSituation.setWorkTime(Time.valueOf("00:00:00"));
+		workSituation.setOvertime(Time.valueOf("00:00:00"));
+
+		workSituationRepository.save(workSituation);
+
+	}
+
+	public static void workEnd(String loginId, Time breakTime, Time workEndMaster, Time workTimeMaster, WorkSituationRepository workSituationRepository) {
+		// 今日の日付を時間を取得
+		Date today = new Date(Calendar.getInstance().getTimeInMillis());
+		Time now = new Time(Calendar.getInstance().getTimeInMillis());
+
+		// 今日の日付と受け取ったログインIDに関する勤務開始時間をworkStartに代入
+		Time workStart = workSituationRepository.findByLoginIdIsAndCreateDateIs(loginId, today).getWorkStart();
+
+		// workTimeIntを計算
+		int workTimeInt = UtilLogic.timeSubtraction(
+				UtilLogic.timeSubtraction(UtilLogic.timeToInt(now), UtilLogic.timeToInt(workStart)),
+				UtilLogic.timeToInt(breakTime));
+
+		// 勤務時間が時間マスターテーブルの勤務時間を超えていたら、残業時間を計算し代入
+
+		int overtimeInt = 0;
+		int workTimeMasterInt = UtilLogic.timeToInt(workTimeMaster);
+		if (workTimeMasterInt < workTimeInt) {
+			overtimeInt = UtilLogic.timeSubtraction(workTimeInt, workTimeMasterInt);
+		}
+
+		// 現在の時間と時間マスターの勤務終了時間をint型にする
+		int nowInt = UtilLogic.timeToInt(now);
+		int workEndMasterInt = UtilLogic.timeToInt(workEndMaster);
+
+		// 今日の日付とログインIDを代入して、対応する勤務状況のリストに代入
+		String yearAndMonthAndDate = new SimpleDateFormat("yyyy-MM-dd").format(today);
+		List<WorkSituation> workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(
+				loginId,
+				UtilLogic.yearAndMonthAndDateToYear(yearAndMonthAndDate),
+				UtilLogic.yearAndMonthAndDateToMonth(yearAndMonthAndDate),
+				UtilLogic.yearAndMonthAndDateToDate(yearAndMonthAndDate));
+
+		// 勤務終了時間が時間マスターテーブルの勤務終了時間より、遅かったら帰宅、早かったら早退
+		String workSitu = "";
+		for (WorkSituation w : workSituationList) {
+			workSitu = w.getWorkSitu();
+		}
+		if (nowInt >= workEndMasterInt) {
+			workSitu = workSitu + " → 帰宅";
+		} else {
+			workSitu = workSitu + " → 早退";
+		}
+
+		workSituationRepository.setFixedWorkSituAndWorkEndAndBreakTimeAndWorkTimeAndOvertimeFor(
+				workSitu,
+				now,
+				breakTime,
+				Time.valueOf(UtilLogic.intToStringTime(workTimeInt)),
+				Time.valueOf(UtilLogic.intToStringTime(overtimeInt)),
+				loginId,
+				today);
+
 	}
 
 

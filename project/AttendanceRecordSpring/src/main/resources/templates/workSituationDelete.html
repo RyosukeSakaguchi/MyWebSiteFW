@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<!-- 共通header.html読み込み-->
+		<div th:replace="header"></div>
+		<title>勤務情報消去</title>
+		<!-- オリジナルCSS読み込み -->
+		<link th:href="@{css/original/common.css}" rel="stylesheet"/>
+	</head>
+
+	<body>
+		<div class="fh5co-loader"></div>
+		<section id="fh5co-hero" class="no-js-fullheight" style="background-image: url(images/full_image_2.jpg);" data-next="yes">
+			<div class="fh5co-overlay"></div>
+			<div class="container">
+				<div class="fh5co-intro no-js-fullheight">
+					<div class="fh5co-intro-text">
+						<div class="fh5co-center-position">
+							<h2 class="animate-box">
+								<font size="5">
+									${confMsg1}
+									<font color="red">
+										${confMsg2}
+									</font>
+									${confMsg3}
+								</font>
+							</h2><br/><br/>
+							<p class="animate-box">
+							<div class="wrapper">
+								<div>
+									<div th:if="${date == null}">
+										<a th:href="'MonthlyWorkCheck?id=' + ${user.getId()} + '&amp;year=' + ${year} + '&amp;month=' + ${month}" class="btn btn-outline "><i class="icon-play2"></i> Cancel</a>
+									</div>
+									<div th:unless="${date == null}">
+										<a th:href="'DailyWorkCheck?id=' + ${user.getId()} + '&amp;year=' + ${year} + '&amp;month=' + ${month} + '&amp;date=' + ${date}" class="btn btn-outline "><i class="icon-play2"></i> Cancel</a>
+									</div>
+								</div>
+								<div>
+									<form th:action="@{/WorkSituationDelete}" method="post">
+										<input type="hidden" name="id" th:value="${id}" />
+										<input type="hidden" name="year" th:value="${year}" />
+										<input type="hidden" name="month" th:value="${month}" />
+										<input type="hidden" name="date" th:value="${date}" />
+										<tr th:each="workSituation : ${workSituationList}">
+											<input type="hidden" name="workSituationIdList[]" th:value="${workSituation.id}" />
+										</tr>
+										<button class="btn btn-outline" type="submit"><i class="icon-play2"></i> OK</button>
+									</form>
+								</div>
+							</div>
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 共通footer.html読み込み-->
+		<div th:replace="footer"></div>
+
+	</body>
+
+</html>
+
