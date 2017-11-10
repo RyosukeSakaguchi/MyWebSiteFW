@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,8 +38,8 @@ public class WorkSituationDeleteController {
 	private WorkSituationEditRepository workSituationEditRepository;
 
 	@GetMapping
-	public String get(@RequestParam int id, @RequestParam int year, @RequestParam int month, @RequestParam int date,
-			@ModelAttribute WorkSituationDeleteForm workSituationDeleteForm, Model model) {
+	public String get(@RequestParam int id, @RequestParam int year, @RequestParam int month, @RequestParam String date, Model model) {
+
 
 		// HttpSessionインスタンスの取得
 		User loginUser = (User) session.getAttribute("loginUser");
@@ -47,7 +47,7 @@ public class WorkSituationDeleteController {
 		if (loginUser == null) {
 			// LoginScreenへリダイレクト
 			return "redirect:/LoginScreen";
-		} else if (String.valueOf(workSituationDeleteForm.getDate()).length() == 0) {
+		} else if (date.equals("nothing")) {
 
 			// パラメータidに対応するUserBeans型のuserInfoインスタンスをリクエストスコープに保存
 			User user = new User();
@@ -65,20 +65,22 @@ public class WorkSituationDeleteController {
 			model.addAttribute("id", id);
 			model.addAttribute("year", year);
 			model.addAttribute("month", month);
+			model.addAttribute("name", user.getName());
 
 			// 勤務状況のリストがない場合はエラーメッセージとともにMonthlyWorkCheckへフォワード
 			if (workSituationList.size() == 0) {
 				model.addAttribute("errMsg", "削除するデータがありません");
 
-				// MonthlyWorkCheckへリダイレクト
-				return "redirect:/MonthlyWorkCheck";
+				// monthlyWorkCheck.htmlへフォワード
+				return "monthlyWorkCheck";
+
 
 			}
 
 			// 削除確認メッセージをリクエストスコープに保存
 			model.addAttribute("confMsg1", "本当に");
 			model.addAttribute("confMsg2", year + "年" + month + "月");
-			model.addAttribute("confMsg3", "のデータを全て削除してもよろしいでしょうか。");
+			model.addAttribute("confMsg3", "のデータを全て削除してもよろしいでしょうか");
 
 			// workSituationDelete.htmlへフォワード
 			return "workSituationDelete";
@@ -94,27 +96,28 @@ public class WorkSituationDeleteController {
 			String loginId = user.getLoginId();
 			List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
 			workSituationList = workSituationRepository
-					.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(loginId, year, month, date);
+					.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(loginId, year, month, Integer.parseInt(date));
 			model.addAttribute("workSituationList", workSituationList);
 
 			// リクエストスコープにパラメータを保存
 			model.addAttribute("id", id);
 			model.addAttribute("year", year);
 			model.addAttribute("month", month);
-			model.addAttribute("date", date);
+			model.addAttribute("date", Integer.parseInt(date));
+			model.addAttribute("name", user.getName());
 
 			// 勤務状況のリストがない場合はエラーメッセージとともにDailyWorkCheckへフォワード
 			if (workSituationList.size() == 0) {
-				model.addAttribute("errMsg", "削除するデータがありません。");
+				model.addAttribute("errMsg", "削除するデータがありません");
 
-				// DailyWorkCheckへリダイレクト
-				return "redirect:/DailyWorkCheck";
+				// dailyWorkCheck.htmlへフォワード
+				return "dailyWorkCheck";
 			}
 
 			// 削除確認メッセージをリクエストスコープに保存
 			model.addAttribute("confMsg1", "本当に");
 			model.addAttribute("confMsg2", year + "年" + month + "月" + date + "日");
-			model.addAttribute("confMsg3", "のデータを削除してもよろしいでしょうか。");
+			model.addAttribute("confMsg3", "のデータを削除してもよろしいでしょうか");
 
 			// workSituationDelete.htmlへフォワード
 			return "workSituationDelete";
@@ -123,7 +126,7 @@ public class WorkSituationDeleteController {
 	}
 
 	@PostMapping
-	public String post(@Validated @ModelAttribute WorkSituationDeleteForm workSituationDeleteForm, Model model) {
+	public String post(@ModelAttribute WorkSituationDeleteForm workSituationDeleteForm, BindingResult result, Model model) {
 
 		// ユーザーを探してuserInfoに代入
 		User user = new User();
@@ -131,7 +134,7 @@ public class WorkSituationDeleteController {
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 
 		// リクエストパラメータがnullかそうでないかで分岐
-		if (String.valueOf(workSituationDeleteForm.getDate()).length() == 0) {
+		if (workSituationDeleteForm.getDate() == 0) {
 			// 削除履歴を作成
 			WorkSituationEdit workSituationEdit = new WorkSituationEdit();
 			workSituationEdit.setLoginId(user.getLoginId());
@@ -142,7 +145,9 @@ public class WorkSituationDeleteController {
 
 			// 勤務状況を削除
 			for (int i = 0; i < workSituationDeleteForm.getWorkSituationIdList().length; i++) {
-				workSituationRepository.delete(workSituationDeleteForm.getWorkSituationIdList()[i]);
+				WorkSituation WorkSituation = new WorkSituation();
+				WorkSituation = workSituationRepository.findByIdIs(workSituationDeleteForm.getWorkSituationIdList()[i]);
+				workSituationRepository.delete(WorkSituation);
 			}
 		} else {
 			// 削除履歴を作成
@@ -152,10 +157,11 @@ public class WorkSituationDeleteController {
 			workSituationEdit.setEditContent(workSituationDeleteForm.getYear() + "年" + workSituationDeleteForm.getMonth() + "月" + workSituationDeleteForm.getDate() +  "日の勤務データを削除しました");
 			workSituationEditRepository.save(workSituationEdit);
 
-
 			// 勤務状況を削除
 			for (int i = 0; i < workSituationDeleteForm.getWorkSituationIdList().length; i++) {
-				workSituationRepository.delete(workSituationDeleteForm.getWorkSituationIdList()[i]);
+				WorkSituation WorkSituation = new WorkSituation();
+				WorkSituation = workSituationRepository.findByIdIs(workSituationDeleteForm.getWorkSituationIdList()[i]);
+				workSituationRepository.delete(WorkSituation);
 			}
 		}
 

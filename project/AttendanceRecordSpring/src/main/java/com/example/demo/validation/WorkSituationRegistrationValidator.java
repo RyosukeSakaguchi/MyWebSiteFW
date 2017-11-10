@@ -41,13 +41,20 @@ public class WorkSituationRegistrationValidator implements Validator {
 		User loginUser = (User) session.getAttribute("loginUser");
 		String loginId = loginUser.getLoginId();
 
+		if (workSituationRegistrationForm.getSituation().equals("start")) {
+			return;
+		}
+
 		// 今日の日付と受け取ったログインIDに関する勤務開始時間をworkStartに代入
 		Time workStart = workSituationRepository.findByLoginIdIsAndCreateDateIs(loginId, today).getWorkStart();
 
+		if(workSituationRegistrationForm.getBreakTime().length() == 5) {
+			workSituationRegistrationForm.setBreakTime(workSituationRegistrationForm.getBreakTime() + ":00");
+		}
 		// workTimeIntを計算
 		int workTimeInt = UtilLogic.timeSubtraction(
 				UtilLogic.timeSubtraction(UtilLogic.timeToInt(now), UtilLogic.timeToInt(workStart)),
-				UtilLogic.timeToInt(workSituationRegistrationForm.getBreakTime()));
+				UtilLogic.stringTimeToInt(workSituationRegistrationForm.getBreakTime()));
 
 		if (workTimeInt < 0) {
 			errors.rejectValue("breakTime", null, "休憩時間が正しくありません");

@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.form.UserDeleteForm;
 import com.example.demo.form.UserListForm;
 import com.example.demo.model.User;
+import com.example.demo.model.WorkSituation;
+import com.example.demo.model.WorkSituationEdit;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.WorkSituationEditRepository;
+import com.example.demo.repository.WorkSituationRepository;
 
 @RequestMapping("/UserDelete")
 @Controller
@@ -27,6 +31,10 @@ public class UserDeleteController {
 	HttpSession session;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private WorkSituationRepository workSituationRepository;
+	@Autowired
+	private WorkSituationEditRepository workSituationEditRepository;
 
 	@GetMapping
 	public String get(@ModelAttribute UserListForm userListForm, @RequestParam String id, Model model) {
@@ -36,7 +44,7 @@ public class UserDeleteController {
 		if (loginUser == null) {
 			// LoginScreenへリダイレクト
 			return "redirect:/LoginScreen";
-		} else if (id == null) {
+		} else if (id.equals("0")) {
 			// リクエストスコープからパラメータを取得
 			int delListId[] = userListForm.getDelListId();
 
@@ -46,11 +54,7 @@ public class UserDeleteController {
 				model.addAttribute("noCheckMsg", "未選択です");
 
 				// UserListへリダイレクト
-//				return "redirect:/UserList";
-//				// UserListのdoGetメソッドを実行
-//				UserListController userList = new UserListController();
-//				userList.get(userListForm, model);
-//				return;
+				return "redirect:/UserList";
 
 			} else {
 
@@ -100,7 +104,7 @@ public class UserDeleteController {
 				int[] idList = userDeleteForm.getIdList();
 				for (int i = 0; i < idList.length; i++) {
 					User user = new User();
-//					user = userRepository.findByIdIs(idList[i]);
+					user = userRepository.findByIdIs(idList[i]);
 //					WorkSituationDao.userSituDel(user.getLoginId());
 //					WorkSituationEditDao.userSituEditDel(user.getLoginId());
 //					UserInfoDao.userDel(idList[i]);
@@ -110,34 +114,44 @@ public class UserDeleteController {
 
 				}
 			} else {
-//				// 全ての勤務状況と勤務状況編集履歴とユーザー情報を削除
-//				WorkSituationDao.allUserSituDel();
-//				WorkSituationEditDao.allUserSituEditDel();
-//				UserInfoDao.allUserDel();
+				// // 全ての勤務状況と勤務状況編集履歴とユーザー情報を削除
+				// WorkSituationDao.allUserSituDel();
+				// WorkSituationEditDao.allUserSituEditDel();
+				// UserInfoDao.allUserDel();
 
 				// ユーザー消去成功のメッセージをリクエストスコープに保存
 				model.addAttribute("sucMsg", "全ユーザー情報の削除に成功しました");
 			}
 
-//			// UserListのdoGetメソッドを実行
-//			UserList userList = new UserList();
-//			userList.doGet(request, response);
-//			return;
+			// UserListへリダイレクト
+			return "redirect:/UserList";
 		} else {
+
 
 			// 消去するユーザーのidに対応する勤務状況と勤務状況編集履歴とユーザー情報を削除
 			User user = new User();
 			user = userRepository.findByIdIs(userDeleteForm.getId());
-//			WorkSituationDao.userSituDel(user.getLoginId());
-//			WorkSituationEditDao.userSituEditDel(user.getLoginId());
-//			UserInfoDao.userDel(userDeleteForm.getId());
+
+			List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
+			workSituationList = workSituationRepository.findByLoginIdIs(user.getLoginId());
+			for(WorkSituation workSituation : workSituationList) {
+				workSituationRepository.delete(workSituation);
+			}
+
+			List<WorkSituationEdit> workSituationEditList = new ArrayList<WorkSituationEdit>();
+			workSituationEditList = workSituationEditRepository.findByLoginIdIs(user.getLoginId());
+			for(WorkSituationEdit workSituationEdit : workSituationEditList) {
+				workSituationEditRepository.delete(workSituationEdit);
+			}
+
+			userRepository.delete(userRepository.findByIdIs(userDeleteForm.getId()));
 
 			// ユーザー消去成功のメッセージをリクエストスコープに保存
 			model.addAttribute("sucMsg", "ユーザー情報の削除に成功しました");
 
-//			// UserListのdoGetメソッドを実行
-//			UserList userList = new UserList();
-//			userList.doGet(request, response);
+			// UserListへリダイレクト
+			return "redirect:/UserList";
+
 		}
 	}
 

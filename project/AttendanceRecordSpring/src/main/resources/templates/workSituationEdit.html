@@ -13,31 +13,36 @@
 		<div class="fh5co-loader"></div>
 		<div id="fh5co-page" style="width:95%">
 			<ul class="pull-left left-menu">
-				<br>	　　　　　<a class="btn btn-default" style="border: 2px solid black;" th:href="'DailyWorkCheck?id=' + ${user.getId()} + '&amp;year=' + ${year} + '&amp;month=' + ${month} + '&amp;date=' + ${date}">戻る</a>
+				<br/>	　　　　　<a class="btn btn-default" style="border: 2px solid black;" th:href="'DailyWorkCheck?id=' + ${user.getId()} + '&amp;year=' + ${year} + '&amp;month=' + ${month} + '&amp;date=' + ${date}">戻る</a>
 			</ul>
 			<ul class="pull-right center-right">
-				<br><a class="btn btn-default" style="border: 2px solid black;" href="Logout">ログアウト</a>
+				<br/><a class="btn btn-default" style="border: 2px solid black;" href="Logout">ログアウト</a>
 			</ul>
 		</div>
 
 		<section id="fh5co-projects">
 			<div class="fh5co-overlay"></div>
 			<div class="container" style="width: 90%;">
-				<div align="center">
-					<br><font size="5" color="red">${errMsg}</font>
+				<div align="center"><br/>
+					<font size="5" color="red">
+						<div th:text="${errMsg}" />
+					</font>
+					<font size="5" color="green">
+						<div th:text="${scsMsg}" />
+					</font>
 				</div>
-				<div style="text-align: center;">${year}年${month}月${date}日 ${name}</div>
-				<br><br>
+				<div style="text-align: center;" th:inline="text">[[${year}]]年[[${month}]]月[[${date}]]日 [[${name}]]</div>
+				<br/><br/>
 				<div class="fh5co-intro js-fullheight">
 					<div class="fh5co-intro-text">
 						<div class="fh5co-center-position">
 							<div class="row">
 								<div>
-								<form action="WorkSituationEdit" method="post">
-								<input type="hidden" value="${userInfo.getId()}" name="id" onblur="isEmpty(this)" >
-								<input type="hidden" value="${year}" name="year" onblur="isEmpty(this)" >
-								<input type="hidden" value="${month}" name="month" onblur="isEmpty(this)" >
-								<input type="hidden" value="${date}" name="date" onblur="isEmpty(this)" >
+								<form th:action="@{/WorkSituationEdit}" method="post">
+								<input type="hidden" th:value="${user.getId()}" name="id" onblur="isEmpty(this)" />
+								<input type="hidden" th:value="${year}" name="year" onblur="isEmpty(this)" />
+								<input type="hidden" th:value="${month}" name="month" onblur="isEmpty(this)" />
+								<input type="hidden" th:value="${date}" name="date" onblur="isEmpty(this)" />
 									<table class="table table-striped">
 										<thead>
 											<tr>
@@ -51,34 +56,34 @@
 										</thead>
 										<tbody>
 											<c:forEach var="obj" items="${workSituationList}" >
-												<tr>
+												<tr th:each="workSituation : ${workSituationList}" th:object="${workSituation}">
 													<td style="text-align: center;">
-														${obj.getWorkSitu()}
-														<input type="hidden" value="${obj.getId()}" name="workSituationId" onblur="isEmpty(this)" >
+														<div th:text="*{workSitu}" />
+														<input type="hidden" th:value="*{id}" name="workSituationId" onblur="isEmpty(this)" />
 													</td>
 													<td >
-														<input type="time" step="1" value="${obj.getWorkStart()}" class="form-control" id="inputName" name="workStart"  style="background: white; height: 35px; width: 150px; margin:auto;">
-														<input type="hidden" value="${obj.getWorkStart()}" name="workStartBefore"  >
+														<input type="time" step="1" th:value="*{workStart}" class="form-control" id="inputName" name="workStart"  style="background: white; height: 35px; width: 150px; margin:auto;"/>
+														<input type="hidden" th:value="*{workStart}" name="workStartBefore"  />
 													</td>
 													<td >
-														<input type="time" step="1" value="${obj.getWorkEnd()}" class="form-control" id="inputName" name="workEnd"  style="background: white; height: 35px; width: 150px; margin:auto;">
-														<input type="hidden" value="${obj.getWorkEnd()}" name="workEndBefore"  >
+														<input type="time" step="1" th:value="*{workEnd}" class="form-control" id="inputName" name="workEnd"  style="background: white; height: 35px; width: 150px; margin:auto;"/>
+														<input type="hidden" th:value="*{workEnd}" name="workEndBefore"  />
 													</td>
 													<td >
-														<input type="time" step="1" value="${obj.getBreakTime()}" class="form-control" id="inputName" name="breakTime" style="background: white; height: 35px; width: 150px; margin:auto;">
-														<input type="hidden" value="${obj.getBreakTime()}" name="breakTimeBefore" >
+														<input type="time" step="1" th:value="*{breakTime}" class="form-control" id="inputName" name="breakTime" style="background: white; height: 35px; width: 150px; margin:auto;"/>
+														<input type="hidden" th:value="*{breakTime}" name="breakTimeBefore" />
 													</td>
 													<td style="text-align: center;">
-														${obj.getWorkTime()}
+														<div th:text="*{workTime}" />
 													</td>
 													<td style="text-align: center;">
-														${obj.getOvertime()}
+														<div th:text="*{overtime}" />
 													</td>
 												</tr>
 											</c:forEach>
 										</tbody>
 									</table>
-									<div class=button_wrapper ><br><br><br><br>
+									<div class="button_wrapper" ><br/><br/><br/><br/>
 										<button class="btn btn-info" type="submit" >登録</button>
 									</div>
 									</form>

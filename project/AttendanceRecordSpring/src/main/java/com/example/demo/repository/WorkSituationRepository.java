@@ -12,6 +12,10 @@ import com.example.demo.model.WorkSituation;
 
 public interface WorkSituationRepository extends CrudRepository< WorkSituation, Long> {
 
+	WorkSituation findByIdIs(int id);
+
+	List<WorkSituation> findByLoginIdIs(String loginId);
+
 	// SELECT * FROM work_situation where login_id= ?1 and create_date= ?2
 	WorkSituation findByLoginIdIsAndCreateDateIs(String loginId, Date createDate);
 

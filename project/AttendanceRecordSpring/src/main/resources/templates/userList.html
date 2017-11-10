@@ -40,7 +40,7 @@
 										<div class="form-group">
 											<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">ログインID</label>
 											<div class="col-sm-3">
-												<input type="text" class="form-control" name="login_id" th:field="*{loginId}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+												<input type="text" class="form-control" name="loginId" th:field="*{loginId}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 											</div>
 										</div><br/><br/>
 										<div class="form-group">
@@ -76,11 +76,11 @@
 										<div class="form-group" style="width:800px;">
 											<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">生年月日</label>
 											<div class="col-sm-3">
-												<input type="date" class="form-control"  name="birth_date_from" th:field="*{birthDateFrom}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+												<input type="date" class="form-control"  name="birthDateFrom" th:field="*{birthDateFrom}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 											</div>
 											<label for="inputName" class="col-sm-2 control-label" style="width: 50px;">　〜</label>
 											<div class="col-sm-3">
-												<input type="date" class="form-control"  name="birth_date_to" th:field="*{birthDateTo}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+												<input type="date" class="form-control"  name="birthDateTo" th:field="*{birthDateTo}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 											</div>
 										</div><br/><br/>
 										<div class="form-group">
@@ -136,32 +136,32 @@
 						<div th:if="${pageNumber != 1}">
 							<div class="wrapper">
 								<div >
-									<form action="UserList" th:object="${userListForm}" method="get">
+									<form action="UserList"  method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px ; background-color : rgb(249, 249, 249); border-style: none; "><span class="icon-angle-double-left" aria-hidden="true"></span></button>
-										<input type="hidden" name="pageNumber" value="1"/>
-										<input type="hidden"  name="login_id" value="*${loginId}"/>
-										<input type="hidden" name="name" value="*${name}"/>
-										<input type="hidden" name="position" value="*${position}"/>
-										<input type="hidden" name="birth_date_from" value="*${birthDateFrom}"/>
-										<input type="hidden" name="birth_date_to" value="*${birthDateTo}"/>
-										<input type="hidden" name="workSituation" value="*${workSituation}"/>
-										<div th:inline="text" th:each="user : ${userList}">
-											<input type="hidden" name="userIdList[]" value="${user.id}" />
+										<input type="hidden" th:name="pageNumber" th:value="1"/>
+										<input type="hidden"  th:name="login_id" th:value="${loginId}"/>
+										<input type="hidden" th:name="name" th:value="${name}"/>
+										<input type="hidden" th:name="position" th:value="${position}"/>
+										<input type="hidden" th:name="birth_date_from" th:value="${birthDateFrom}"/>
+										<input type="hidden" th:name="birth_date_to" th:value="${birthDateTo}"/>
+										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
+										<div th:inline="text" th:each="user, stat : ${userList}">
+											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
 										</div>
 									</form>
 								</div>　
 								<div >
-									<form action="UserList" th:object="${userListForm}" method="get">
+									<form action="UserList" method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-left" aria-hidden="true"></span></button>
-										<input type="hidden" name="pageNumber" value="*${pageNumber}-1"/>
-										<input type="hidden"  name="login_id" value="*${loginId}"/>
-										<input type="hidden" name="name" value="*${name}"/>
-										<input type="hidden" name="position" value="*${position}"/>
-										<input type="hidden" name="birth_date_from" value="*${birthDateFrom}"/>
-										<input type="hidden" name="birth_date_to" value="*${birthDateTo}"/>
-										<input type="hidden" name="workSituation" value="*${workSituation}"/>
-										<div th:inline="text" th:each="user : ${userList}">
-											<input type="hidden" name="userIdList[]" value="${user.id}" />
+										<input type="hidden" th:name="pageNumber" th:value="${pageNumber}-1"/>
+										<input type="hidden"  th:name="login_id" th:value="${loginId}"/>
+										<input type="hidden" th:name="name" th:value="${name}"/>
+										<input type="hidden" th:name="position" th:value="${position}"/>
+										<input type="hidden" th:name="birth_date_from" th:value="${birthDateFrom}"/>
+										<input type="hidden" th:name="birth_date_to" th:value="${birthDateTo}"/>
+										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
+										<div th:inline="text" th:each="user, stat : ${userList}">
+											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
 										</div>
 									</form>
 								</div>
@@ -181,30 +181,30 @@
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px ;background-color : rgb(249, 249, 249); border-style: none;">
 											<span class="icon-angle-right" aria-hidden="true"></span>
 										</button>
-										<input type="hidden" name="pageNumber" th:value="${pageNumber}+1"/>
-										<input type="hidden"  name="loginId" th:value="${loginId}"/>
-										<input type="hidden" name="name" th:value="${name}"/>
-										<input type="hidden" name="position" th:value="${position}"/>
-										<input type="hidden" name="birthDateFrom" th:value="${birthDateFrom}"/>
-										<input type="hidden" name="birthDateTo" th:value="${birthDateTo}"/>
-										<input type="hidden" name="workSituation" th:value="${workSituation}"/>
-										<div th:inline="text" th:each="user : ${userList}">
-											<input type="hidden" name="userIdList[]" th:value="${user.id}" />
+										<input type="hidden" th:name="pageNumber" th:value="${pageNumber}+1"/>
+										<input type="hidden"  th:name="loginId" th:value="${loginId}"/>
+										<input type="hidden" th:name="name" th:value="${name}"/>
+										<input type="hidden" th:name="position" th:value="${position}"/>
+										<input type="hidden" th:name="birthDateFrom" th:value="${birthDateFrom}"/>
+										<input type="hidden" th:name="birthDateTo" th:value="${birthDateTo}"/>
+										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
+										<div th:inline="text" th:each="user, stat : ${userList}">
+											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
 										</div>
 									</form>
 								</div>　
 								<div>
-									<form action="UserList" th:object="${userListForm}" method="get">
+									<form action="UserList"  method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-double-right" aria-hidden="true"></span></button>
-										<input type="hidden" name="pageNumber" value="${totalPageNumber}"/>
-										<input type="hidden"  name="login_id" value="${loginId}"/>
-										<input type="hidden" name="name" value="${name}"/>
-										<input type="hidden" name="position" value="${position}"/>
-										<input type="hidden" name="birth_date_from" value="${birthDateFrom}"/>
-										<input type="hidden" name="birth_date_to" value="${birthDateTo}"/>
-										<input type="hidden" name="workSituation" value="${workSituation}"/>
-										<div th:inline="text" th:each="user : ${userList}">
-											<input type="hidden" name="userIdList[]" value="${user.id}" />
+										<input type="hidden" th:name="pageNumber" th:value="${totalPageNumber}"/>
+										<input type="hidden"  th:name="login_id" th:value="${loginId}"/>
+										<input type="hidden" th:name="name" th:value="${name}"/>
+										<input type="hidden" th:name="position" th:value="${position}"/>
+										<input type="hidden" th:name="birth_date_from" th:value="${birthDateFrom}"/>
+										<input type="hidden" th:name="birth_date_to" th:value="${birthDateTo}"/>
+										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
+										<div th:inline="text" th:each="user, stat  : ${userList}">
+											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
 										</div>
 									</form>
 								</div>
@@ -215,11 +215,12 @@
 							<div></div>
 						</div>
 					</div>
-					<form name="form1" action="UserDelete" method="get">
+					<form name="form1" th:action="@{/UserDelete}" method="get">
+					<input type="hidden" name="id" th:value="0"/>
 						<div class="wrapper">
 							<div>
-								<input type="button" class="btn btn-primary" value="全て選択" onClick="BoxChecked(true);"/>
-								<input type="button" class="btn btn-warning" value="全て未選択" onClick="BoxChecked(false);" />
+								<input type="button" class="btn btn-primary" th:value="全て選択" onClick="BoxChecked(true);"/>
+								<input type="button" class="btn btn-warning" th:value="全て未選択" onClick="BoxChecked(false);" />
 							</div>
 							<div>
 								<button class="btn btn-danger" type="submit">選択したユーザーを削除</button>
@@ -245,7 +246,7 @@
 											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userNumberPerPage * pageNumber-1)}">
 												<td></td>
 												<td>
-													<input type="checkbox" name="delListId[]" value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
+													<input type="checkbox" th:name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
 												</td>
 												<td>
 													<div th:inline="text">[[${userList.get(seq).getLoginId()}]]</div>
@@ -281,7 +282,7 @@
 											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userList.size() - 1)}">
 												<td></td>
 												<td>
-													<input type="checkbox" name="delListId[]" value="*${userList.get(seq).getId()}" onClick="DisChecked();"/>
+													<input type="checkbox" th:name="|delListId[${seq}]|" th:value="*${userList.get(seq).getId()}" onClick="DisChecked();"/>
 												</td>
 												<td>[[${userList.get(seq).getLoginId()}]]</td>
 												<td>[[${userList.get(seq).getName()}]]</td>
@@ -313,7 +314,7 @@
 						</div>
 					</form>
 					<font size="3" color="red"><div th:text="${salaryErrMsg}" /></font><br/>
-					<form action="OutputCSV" method="post">
+					<form action="DownloadCsv" method="post">
 						<div class="col-sm-3" style="width: 220px">
 							<input type="month" class="form-control" name="yearAndMonth" style="background: white; height: 35px; width: 200px;"/>
 						</div>

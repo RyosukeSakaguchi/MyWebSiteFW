@@ -24,8 +24,9 @@
 			<div class="container" style="width: 100%;">
 				<div style="text-align: center;" th:inline="text">[[${year}]]年[[${month}]]月[[${date}]]日 [[${name}]]</div><br/>
 				<div align="center">
-					<br/><font size="5" color="red">${errMsg}</font><br/><br/>
-					<font size="5" color="red">${scsMsg}</font>
+					<br/><font size="5" color="red">
+						<div th:text="${errMsg}" />
+					</font><br/><br/>
 				</div>
 				<div class="fh5co-intro js-fullheight">
 					<div class="fh5co-intro-text">
@@ -41,7 +42,7 @@
 												</ul>
 											</div>
 											<div>
-												<form action="OutputCSV" method="post">
+												<form action="DownloadCsv" method="post">
 													<button class="btn btn-warning" type="submit">csvに出力</button>
 													<input type="hidden" th:value="${user.getId()}" name="id"/>
 													<input type="hidden" th:value="${year}" name="year"/>

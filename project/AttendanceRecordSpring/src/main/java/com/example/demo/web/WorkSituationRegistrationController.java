@@ -83,6 +83,9 @@ public class WorkSituationRegistrationController {
 
 			model.addAttribute("loginUser", loginUser);
 			model.addAttribute("breakTime", timeRepository.findByIdIs(1).getBreakTime());
+			if(workSituationRegistrationForm.getBreakTime() == null) {
+				workSituationRegistrationForm.setBreakTime(UtilLogic.intToStringTime(UtilLogic.timeToInt(timeRepository.findByIdIs(1).getBreakTime())));
+			}
 
 			Time now = new Time(Calendar.getInstance().getTimeInMillis());
 
@@ -141,17 +144,18 @@ public class WorkSituationRegistrationController {
 			// RegistrationCompleteへリダイレクト
 			return "redirect:/RegistrationComplete?situation=start";
 
-		} else if (situation.equals("end")) {
+		} else {
+
 			// 入力が正しいとき、勤務状況をテーブルに保存
-			Time breakTime = workSituationRegistrationForm.getBreakTime();
+			Time breakTime = Time.valueOf(workSituationRegistrationForm.getBreakTime());
 			Time workEndMaster = timeRepository.findByIdIs(1).getWorkEnd();
 			Time workTimeMaster = timeRepository.findByIdIs(1).getWorkTime();
 			UtilLogic.workEnd(loginId, breakTime, workEndMaster, workTimeMaster, workSituationRepository);
+
 			// RegistrationCompleteへリダイレクト
 			return "redirect:/RegistrationComplete?situation=end";
 
 		}
-		return null;
 	}
 
 }

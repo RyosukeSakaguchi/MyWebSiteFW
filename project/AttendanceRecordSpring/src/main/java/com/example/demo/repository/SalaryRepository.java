@@ -6,4 +6,6 @@ import com.example.demo.model.SalaryMaster;
 
 public interface SalaryRepository  extends CrudRepository< SalaryMaster, Long> {
 
+	SalaryMaster findByPositionIs(String position);
+
 }

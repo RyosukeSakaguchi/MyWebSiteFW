@@ -46,8 +46,8 @@
 										</font><br/><br/>
 									</div>
 									<form th:action="@{/WorkSituationRegistration}" method="post">
-										<input type="hidden" name="id" value="${loginUser.getId()}"/>
-										<input type="hidden" name="situation" value="start"/>
+										<input type="hidden" name="id" th:value="${loginUser.getId()}"/>
+										<input type="hidden" name="situation" th:value="start"/>
 										<button class="btn btn-outline" type="submit" style="color: red;"><i class="icon-play2" style="color: white;"></i> Start</button>
 									</form>
 								</div>
@@ -58,16 +58,17 @@
 										</font>
 									</div>
 									<form th:action="@{/WorkSituationRegistration}" th:object="${workSituationRegistrationForm}" method="post">
-									<br/>
+									<font size="3" color="red">
+										<span th:if="${#fields.hasErrors('breakTime')}" th:errors="*{breakTime}"></span>
+									</font><br/>
 									<div class="form-group" style="margin-left: 200px;">
 										<label for="inputName" class="col-sm-2 control-label" style="width: 100px;">休憩時間</label>
 										<div class="col-sm-3">
-											<input type="time" th:value="${breakTime}"  class="form-control" id="inputName" name="breakTime" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
-										</div>
-										<span th:if="${#fields.hasErrors('breakTime')}" th:errors="*{breakTime}"></span>
+											<input type="time" th:field="*{breakTime}" class="form-control" id="inputName" name="breakTime" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+										</div><br/>
 									</div>
 									<br/><br/>
-										<input type="hidden" name="situation" value="end" />
+										<input type="hidden" name="situation" th:value="end" />
 										<button name="situation" type="submit"  class="btn btn-outline" style="color: red;"><i class="icon-play2" style="color: white;"></i> End</button>
 									</form>
 								</div>

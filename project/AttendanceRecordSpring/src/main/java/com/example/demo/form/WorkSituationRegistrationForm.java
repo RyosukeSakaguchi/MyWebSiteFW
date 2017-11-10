@@ -1,11 +1,9 @@
 package com.example.demo.form;
 
-import java.sql.Time;
-
 public class WorkSituationRegistrationForm {
 
 	private String situation;
-	private Time breakTime;
+	private String breakTime;
 
 	public String getSituation() {
 		return situation;
@@ -13,10 +11,10 @@ public class WorkSituationRegistrationForm {
 	public void setSituation(String situation) {
 		this.situation = situation;
 	}
-	public Time getBreakTime() {
+	public String getBreakTime() {
 		return breakTime;
 	}
-	public void setBreakTime(Time breakTime) {
+	public void setBreakTime(String breakTime) {
 		this.breakTime = breakTime;
 	}
 

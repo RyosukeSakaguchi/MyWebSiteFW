@@ -9,12 +9,36 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import beans.UserBeans;
-import beans.WorkSituationBeans;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.demo.model.User;
+import com.example.demo.model.WorkSituation;
+
+@Controller
+@RequestMapping("CsvFileWrite")
 public class CsvFileWrite extends UtilLogic {
 
-	/** 全ユーザーの月給をcsvファイルに出力する
+//	@GetMapping(value = "*.csv", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+//			+ "; charset=Shift_JIS; Content-Disposition: attachment")
+//	@ResponseBody
+//	public Object getSalaryCsv(List<User> userList, int year, int month) throws JsonProcessingException {
+//		List<MonthlySalary> salaryList = new ArrayList<MonthlySalary>();
+//		for (User user : userList) {
+//			add(new MonthlySalary(user.getName(),
+//					getMonthlySalary(user.getLoginId(), user.getPosition(), year, month)));
+//		}
+//
+//		CsvMapper mapper = new CsvMapper();
+//		CsvSchema schema = mapper.schemaFor(Demo.class).withHeader();
+//		return mapper.writer(schema).writeValueAsString(demos);
+//	}
+//
+//}
+
+	/**
+	 * 全ユーザーの月給をcsvファイルに出力する
+	 *
 	 * @param response
 	 * @param userList
 	 * @param year
@@ -22,8 +46,8 @@ public class CsvFileWrite extends UtilLogic {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public static void getSalary(HttpServletResponse response, List<UserBeans> userList, int year, int month)
-			throws ServletException, IOException {
+
+	public static void getSalary(HttpServletResponse response, List<User> userList, int year, int month) {
 
 		try {
 			// ダウンロードファイル名を生成する
@@ -41,7 +65,7 @@ public class CsvFileWrite extends UtilLogic {
 			pw.print("月給");
 			pw.println();
 
-			for (UserBeans user : userList) {
+			for (User user : userList) {
 				if (user.getId() != 1) {
 					pw.print(user.getName());
 					pw.print(",");
@@ -57,7 +81,9 @@ public class CsvFileWrite extends UtilLogic {
 		}
 	}
 
-	/** ユーザーの月の勤務状況をcsvファイルに出力
+	/**
+	 * ユーザーの月の勤務状況をcsvファイルに出力
+	 *
 	 * @param response
 	 * @param workSituationList
 	 * @param userName
@@ -68,7 +94,7 @@ public class CsvFileWrite extends UtilLogic {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public static void getMonthlyWorkSituation(HttpServletResponse response, List<WorkSituationBeans> workSituationList,
+	public static void getMonthlyWorkSituation(HttpServletResponse response, List<WorkSituation> workSituationList,
 			String userName, int year, int month, String titalWorkTime, String titalOvertime)
 			throws ServletException, IOException {
 
@@ -103,7 +129,7 @@ public class CsvFileWrite extends UtilLogic {
 			pw.print("残業時間");
 			pw.println();
 
-			for (WorkSituationBeans workSituation : workSituationList) {
+			for (WorkSituation workSituation : workSituationList) {
 
 				SimpleDateFormat sdf = new SimpleDateFormat("dd");
 				String CreateDate = sdf.format(workSituation.getCreateDate());
@@ -142,7 +168,9 @@ public class CsvFileWrite extends UtilLogic {
 
 	}
 
-	/** ユーザーの日の勤務状況をcsvファイルに出力
+	/**
+	 * ユーザーの日の勤務状況をcsvファイルに出力
+	 *
 	 * @param response
 	 * @param workSituationList
 	 * @param userName
@@ -152,7 +180,7 @@ public class CsvFileWrite extends UtilLogic {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public static void getDailyWorkSituation(HttpServletResponse response, List<WorkSituationBeans> workSituationList,
+	public static void getDailyWorkSituation(HttpServletResponse response, List<WorkSituation> workSituationList,
 			String userName, int year, int month, int date) throws ServletException, IOException {
 
 		try {
@@ -166,7 +194,7 @@ public class CsvFileWrite extends UtilLogic {
 			PrintWriter pw = response.getWriter();
 
 			// 内容を指定する
-			pw.print(year + "/" + month + "/" + date );
+			pw.print(year + "/" + month + "/" + date);
 			pw.print(",");
 			pw.print(userName);
 			pw.println();
@@ -184,7 +212,7 @@ public class CsvFileWrite extends UtilLogic {
 			pw.print("残業時間");
 			pw.println();
 
-			for (WorkSituationBeans workSituation : workSituationList) {
+			for (WorkSituation workSituation : workSituationList) {
 
 				pw.print(workSituation.getWorkSitu());
 				pw.print(",");

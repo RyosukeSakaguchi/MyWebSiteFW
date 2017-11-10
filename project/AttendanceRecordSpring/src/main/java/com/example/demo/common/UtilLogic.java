@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,10 +20,12 @@ import org.springframework.stereotype.Component;
 import com.example.demo.model.SalaryMaster;
 import com.example.demo.model.User;
 import com.example.demo.model.WorkSituation;
+import com.example.demo.model.WorkSituationEdit;
+import com.example.demo.repository.SalaryRepository;
+import com.example.demo.repository.TimeRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.WorkSituationEditRepository;
 import com.example.demo.repository.WorkSituationRepository;
-
-import dao.SalaryMasterDao;
-import dao.WorkSituationDao;
 
 /**
  * @author sakaguchimikiya
@@ -35,6 +38,8 @@ import dao.WorkSituationDao;
 @Component
 @ComponentScan("common")
 public class UtilLogic {
+
+
 
 	/**
 	 * パスワードを暗号化するメソッド
@@ -234,9 +239,9 @@ public class UtilLogic {
 	 * @param month
 	 * @return int
 	 */
-	public static int getMonthlySalary(String loginId, String position, int year, int month) {
+	public static int getMonthlySalary(String loginId, String position, int year, int month, WorkSituationRepository workSituationRepository, SalaryRepository salaryRepository) {
 		List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
-		workSituationList = WorkSituationDao.findAll(loginId, year, month);
+		workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIs(loginId, year, month);
 
 		// 月の総勤務時間と総残業時間を変数に代入
 		String totalWorkTime = totalWorkTime(workSituationList);
@@ -247,7 +252,7 @@ public class UtilLogic {
 		int totalWorkTimeInt = stringTimeToInt(totalWorkTime);
 		int totalOvertimeInt = stringTimeToInt(totalOvertime);
 		int diffTotalTimeInt = timeSubtraction(totalWorkTimeInt, totalOvertimeInt);
-		int salary = (int) (calSalary(diffTotalTimeInt, position) + calOvertimeSalary(totalOvertimeInt, position));
+		int salary = (int) (calSalary(diffTotalTimeInt, position, salaryRepository) + calOvertimeSalary(totalOvertimeInt, position, salaryRepository));
 
 		return salary;
 	}
@@ -259,7 +264,7 @@ public class UtilLogic {
 	 * @param position
 	 * @return double
 	 */
-	public static double calSalary(int timeInt, String position) {
+	public static double calSalary(int timeInt, String position, SalaryRepository salaryRepository) {
 
 		// int型の6桁の変数の下2桁を取り出す。(ex : 093452 → 52)
 		int underTwo = timeInt % 100;
@@ -274,7 +279,7 @@ public class UtilLogic {
 		int topTwo = (timeInt - middle - underTwo) / 10000;
 
 		// 給与マスターテーブルから受け取った役職に対するSalaryBeans型のsalaryInfoを取得
-		SalaryMaster salaryInfo = SalaryMasterDao.getSalaryInfo(position);
+		SalaryMaster salaryInfo = salaryRepository.findByPositionIs(position);
 
 		// 受け取った時給salaryInfo.getHourlyWage()を用いて月給を計算し、return
 		return (salaryInfo.getHourlyWage()) * (topTwo + middleTwo / 60.0 + underTwo / 3600.0);
@@ -287,7 +292,7 @@ public class UtilLogic {
 	 * @param position
 	 * @return double
 	 */
-	public static double calOvertimeSalary(int timeInt, String position) {
+	public static double calOvertimeSalary(int timeInt, String position, SalaryRepository salaryRepository) {
 
 		// int型の6桁の変数の下2桁を取り出す。(ex : 093452 → 52)
 		int underTwo = timeInt % 100;
@@ -302,7 +307,7 @@ public class UtilLogic {
 		int topTwo = (timeInt - middle - underTwo) / 10000;
 
 		// 給与マスターテーブルから受け取った役職に対するSalaryBeans型のsalaryInfoを取得
-		SalaryMaster salaryInfo = SalaryMasterDao.getSalaryInfo(position);
+		SalaryMaster salaryInfo = salaryRepository.findByPositionIs(position);
 
 		// 受け取った残業代salaryInfo.getOvertimeHourlyWage()を用いて月の残業代を計算し、return
 		return (salaryInfo.getOvertimeHourlyWage()) * (topTwo + middleTwo / 60.0 + underTwo / 3600.0);
@@ -501,7 +506,8 @@ public class UtilLogic {
 
 	}
 
-	public static void workEnd(String loginId, Time breakTime, Time workEndMaster, Time workTimeMaster, WorkSituationRepository workSituationRepository) {
+	public static void workEnd(String loginId, Time breakTime, Time workEndMaster, Time workTimeMaster,
+			WorkSituationRepository workSituationRepository) {
 		// 今日の日付を時間を取得
 		Date today = new Date(Calendar.getInstance().getTimeInMillis());
 		Time now = new Time(Calendar.getInstance().getTimeInMillis());
@@ -509,10 +515,16 @@ public class UtilLogic {
 		// 今日の日付と受け取ったログインIDに関する勤務開始時間をworkStartに代入
 		Time workStart = workSituationRepository.findByLoginIdIsAndCreateDateIs(loginId, today).getWorkStart();
 
-		// workTimeIntを計算
-		int workTimeInt = UtilLogic.timeSubtraction(
-				UtilLogic.timeSubtraction(UtilLogic.timeToInt(now), UtilLogic.timeToInt(workStart)),
-				UtilLogic.timeToInt(breakTime));
+		int workTimeInt;
+		if (breakTime == null) {
+			// workTimeIntを計算
+			workTimeInt = UtilLogic.timeSubtraction(UtilLogic.timeToInt(now), UtilLogic.timeToInt(workStart));
+		} else {
+			// workTimeIntを計算
+			workTimeInt = UtilLogic.timeSubtraction(
+					UtilLogic.timeSubtraction(UtilLogic.timeToInt(now), UtilLogic.timeToInt(workStart)),
+					UtilLogic.timeToInt(breakTime));
+		}
 
 		// 勤務時間が時間マスターテーブルの勤務時間を超えていたら、残業時間を計算し代入
 
@@ -528,11 +540,11 @@ public class UtilLogic {
 
 		// 今日の日付とログインIDを代入して、対応する勤務状況のリストに代入
 		String yearAndMonthAndDate = new SimpleDateFormat("yyyy-MM-dd").format(today);
-		List<WorkSituation> workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(
-				loginId,
-				UtilLogic.yearAndMonthAndDateToYear(yearAndMonthAndDate),
-				UtilLogic.yearAndMonthAndDateToMonth(yearAndMonthAndDate),
-				UtilLogic.yearAndMonthAndDateToDate(yearAndMonthAndDate));
+		List<WorkSituation> workSituationList = workSituationRepository
+				.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(loginId,
+						UtilLogic.yearAndMonthAndDateToYear(yearAndMonthAndDate),
+						UtilLogic.yearAndMonthAndDateToMonth(yearAndMonthAndDate),
+						UtilLogic.yearAndMonthAndDateToDate(yearAndMonthAndDate));
 
 		// 勤務終了時間が時間マスターテーブルの勤務終了時間より、遅かったら帰宅、早かったら早退
 		String workSitu = "";
@@ -545,15 +557,126 @@ public class UtilLogic {
 			workSitu = workSitu + " → 早退";
 		}
 
-		workSituationRepository.setFixedWorkSituAndWorkEndAndBreakTimeAndWorkTimeAndOvertimeFor(
-				workSitu,
-				now,
-				breakTime,
-				Time.valueOf(UtilLogic.intToStringTime(workTimeInt)),
-				Time.valueOf(UtilLogic.intToStringTime(overtimeInt)),
-				loginId,
-				today);
+		WorkSituation workSituation = new WorkSituation();
 
+		workSituation.setId(workSituationRepository.findByLoginIdIsAndCreateDateIs(loginId, today).getId());
+		workSituation.setLoginId(loginId);
+		workSituation.setCreateDate(today);
+		workSituation.setWorkSitu(workSitu);
+		workSituation
+				.setWorkStart(workSituationRepository.findByLoginIdIsAndCreateDateIs(loginId, today).getWorkStart());
+		workSituation.setWorkEnd(now);
+		workSituation.setBreakTime(breakTime);
+		workSituation.setWorkTime(Time.valueOf(UtilLogic.intToStringTime(workTimeInt)));
+		workSituation.setOvertime(Time.valueOf(UtilLogic.intToStringTime(overtimeInt)));
+		workSituationRepository.save(workSituation);
+
+	}
+
+	public static boolean workSituationEdit(int workSituationId, String workStart, String workEnd, String breakTime,
+			WorkSituationRepository workSituationRepository, TimeRepository timeRepository) {
+
+		boolean result = true;
+
+		// 勤務開始時間、終了時間と時間マスターの開始時間、終了時間をint型にする(ex : 09:53:23→95323)
+		int workStartInt = UtilLogic.stringTimeToInt(workStart);
+		int workEndInt = UtilLogic.stringTimeToInt(workEnd);
+		Time workStartMaster = timeRepository.findByIdIs(1).getWorkStart();
+		int workStartMasterInt = UtilLogic.timeToInt(workStartMaster);
+		Time workEndMaster = timeRepository.findByIdIs(1).getWorkEnd();
+		int workEndMasterInt = UtilLogic.timeToInt(workEndMaster);
+
+		// 初めは勤務終了時間が入力されていない段階での編集では、開始時間がマスターの開始時間より早いかそうでないかで分岐
+		// 勤務終了時間が入力されている段階での編集でも、開始時間がマスターの開始時間より早いかそうでないかで分岐
+		String workSitu;
+		if (workEndInt == 0) {
+			if (workStartInt > workStartMasterInt) {
+				workSitu = "遅刻";
+			} else {
+				workSitu = "出席";
+			}
+		} else {
+			if (workStartInt > workStartMasterInt) {
+				if (workEndInt >= workEndMasterInt) {
+					workSitu = "遅刻 → 退社";
+				} else {
+					workSitu = "遅刻 → 早退";
+				}
+			} else {
+				if (workEndInt >= workEndMasterInt) {
+					workSitu = "出席 → 退社";
+				} else {
+					workSitu = "出席 → 早退";
+				}
+			}
+		}
+
+		// 勤務終了時間が記入されているか、いないかで分岐
+		int workTimeInt = 0;
+		int overtimeInt = 0;
+		if (UtilLogic.stringTimeToInt(workEnd) != 0) {
+
+			// 勤務時間をint型で時間計算(ex : 194323-094212-10000→090111)
+			workTimeInt = UtilLogic.timeSubtraction(
+					UtilLogic.timeSubtraction(UtilLogic.stringTimeToInt(workEnd), workStartInt),
+					UtilLogic.stringTimeToInt(breakTime));
+
+			// int型の勤務時間が負の時は入力に誤りがあるのでfalseをreturn
+			if (workTimeInt < 0) {
+				result = false;
+				return result;
+			}
+
+			// 時間マスターから勤務時間を取得し、その勤務時間より時間が長かったらその差分を残業時間に代入
+			Time workTimeMaster = timeRepository.findByIdIs(1).getWorkTime();
+			int workTimeMasterInt = UtilLogic.timeToInt(workTimeMaster);
+			if (workTimeMasterInt < workTimeInt) {
+				overtimeInt = UtilLogic.timeSubtraction(workTimeInt, workTimeMasterInt);
+			}
+		}
+
+		WorkSituation workSituation = new WorkSituation();
+		workSituation.setId(workSituationId);
+		workSituation.setLoginId(workSituationRepository.findByIdIs(workSituationId).getLoginId());
+		workSituation.setCreateDate(workSituationRepository.findByIdIs(workSituationId).getCreateDate());
+		workSituation.setWorkSitu(workSitu);
+		workSituation.setWorkStart(Time.valueOf(workStart));
+		workSituation.setWorkEnd(Time.valueOf(workEnd));
+		workSituation.setBreakTime(Time.valueOf(breakTime));
+		workSituation.setWorkTime(Time.valueOf(UtilLogic.intToStringTime(workTimeInt)));
+		workSituation.setOvertime(Time.valueOf(UtilLogic.intToStringTime(overtimeInt)));
+
+		workSituationRepository.save(workSituation);
+
+		return result;
+	}
+
+	public static void setEditHistory(String loginId, String time, String timeBefore, int createDateYear,
+			int createDateMonth, int createDateDate, WorkSituationEditRepository workSituationEditRepository, String timeName) {
+
+		// テーブルへの挿入は時間を変更した時のみ行う
+		if (!time.equals(timeBefore)) {
+
+			// 今日の日付と時間を"yyy-MM-dd HH:mm:ss"の形でtodayStringに代入
+			Date today = new Date(System.currentTimeMillis());
+			SimpleDateFormat d = new SimpleDateFormat("yyy-MM-dd HH:mm:ss");
+			String todayString = d.format(today);
+
+			WorkSituationEdit workSituationEdit = new WorkSituationEdit();
+
+			workSituationEdit.setLoginId(loginId);
+			workSituationEdit.setEditTime(Timestamp.valueOf(todayString));
+			workSituationEdit.setEditContent(createDateYear + "年" + createDateMonth + "月" + createDateDate + "日の"
+					+ UtilLogic.timeNameJa(timeName) + "を" + timeBefore + "から" + time + "に変更しました。");
+
+			workSituationEditRepository.save(workSituationEdit);
+
+		}
+	}
+
+	public static List<User> search(String loginId, String name, String position, Date birthDateFrom, Date birthDateTo, UserRepository userRepository){
+		List<User> userList = userRepository.findAll();
+		return userList;
 	}
 
 
