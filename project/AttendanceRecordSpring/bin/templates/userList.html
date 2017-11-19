@@ -54,19 +54,19 @@
 											<div class="col-sm-3">
 												<select class="form-control" name="position" style="background: white; height: 35px; width: 200px;">
 													<div th:if="${position == null}">
-														<option value="" ></option>
+														<option th:value="null" ></option>
 														<tr th:inline="text" th:each="position : ${positionList}">
-															<option value="${position.position}" >[[${position.position}]]</option>
+															<option th:value="${position.position}" >[[${position.position}]]</option>
 														</tr>
 													</div>
 													<p th:unless="${position == null}">
-														<option value="" ></option>
+														<option th:value="null" ></option>
 														<div th:inline="text" th:each="position : ${positionList}">
 															<p th:if="${position.getPosition() == position}">
-																<option value="${position.getPosition()}" selected="selected" >[[${position.getPosition()}]]</option>
+																<option th:value="${position.position}" selected="selected" >[[${position.getPosition()}]]</option>
 															</p>
 															<p th:unless="${position.getPosition() == position}">
-																<option value="${position.getPosition()}" >[[${position.getPosition()}]]</option>
+																<option th:value="${position.position}" >[[${position.getPosition()}]]</option>
 															</p>
 														</div>
 													</p>
@@ -243,7 +243,7 @@
 									</thead>
 									<tbody>
 										<div th:if="${userNumberPerPage * pageNumber &lt;= userList.size()}">
-											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userNumberPerPage * pageNumber-1)}">
+											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1), userNumberPerPage * pageNumber - 1)}">
 												<td></td>
 												<td>
 													<input type="checkbox" th:name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
@@ -279,34 +279,47 @@
 											</tr>
 										</div>
 										<div th:unless="${userNumberPerPage * pageNumber &lt;= userList.size()}">
-											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1),userList.size() - 1)}">
+											<div th:if="${userNumberPerPage * (pageNumber - 1) &gt; (userList.size() - 1)}">
+												<tr>
+													<td></td>
+												</tr>
+											</div>
+											<div th:unless="${userNumberPerPage * (pageNumber - 1) &gt; (userList.size() - 1)}">
+												<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1), userList.size() - 1)}">
 												<td></td>
 												<td>
-													<input type="checkbox" th:name="|delListId[${seq}]|" th:value="*${userList.get(seq).getId()}" onClick="DisChecked();"/>
+													<input type="checkbox" th:name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
 												</td>
-												<td>[[${userList.get(seq).getLoginId()}]]</td>
-												<td>[[${userList.get(seq).getName()}]]</td>
-												<td>[[${userList.get(seq).getFormatBirthDate()}]]</td>
-												<p th:if="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
+												<td>
+													<div th:inline="text">[[${userList.get(seq).getLoginId()}]]</div>
+												</td>
+												<td>
+													<div th:inline="text">[[${userList.get(seq).getName()}]]</div>
+												</td>
+												<td>
+													<div th:inline="text">[[${userList.get(seq).getFormatBirthDate()}]]</div>
+												</td>
+												<div th:if="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
 													<td>帰宅
-														<c:if test="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
+														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
 															<font size="3" color="red">　残業時間超過</font>
-														</c:if>
+														</p>
 													</td>
-												</p>
-												<p th:unless="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
+												</div>
+												<div th:unless="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
 													<td>勤務中
-														<c:if test="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
+														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
 															<font size="3" color="red">　残業時間超過</font>
-														</c:if>
+														</p>
 													</td>
-												</p>
+												</div>
 												<td>
 													<a class="btn btn-primary" th:href="'UserDetail?id=' + ${userList.get(seq).getId()}">詳細</a>
 													<a class="btn btn-success" th:href="'UserUpdate?id=' + ${userList.get(seq).getId()}">更新</a>
 													<a class="btn btn-danger" th:href="'UserDelete?id=' + ${userList.get(seq).getId()}">削除</a>
 												</td>
 											</tr>
+											</div>
 										</div>
 									</tbody>
 								</table>

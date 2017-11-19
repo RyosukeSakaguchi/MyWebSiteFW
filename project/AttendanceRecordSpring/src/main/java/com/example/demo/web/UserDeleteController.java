@@ -61,9 +61,11 @@ public class UserDeleteController {
 				// UserBeans型のインスタンスの配列を生成し、パラメーターの配列delListId[]に対応するユーザーリストをリクエストスコープに保存
 				List<User> userList = new ArrayList<User>();
 				for (int i = 0; i < delListId.length; i++) {
-					User userInfo = new User();
-					userInfo = userRepository.findByIdIs(delListId[i]);
-					userList.add(userInfo);
+					if(delListId[i] != 0) {
+						User user = new User();
+						user = userRepository.findByIdIs(delListId[i]);
+						userList.add(user);
+					}
 				}
 				model.addAttribute("userList", userList);
 

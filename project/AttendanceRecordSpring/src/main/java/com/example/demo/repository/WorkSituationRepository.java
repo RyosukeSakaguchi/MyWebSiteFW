@@ -4,17 +4,20 @@ import java.sql.Date;
 import java.sql.Time;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import com.example.demo.model.WorkSituation;
 
-public interface WorkSituationRepository extends CrudRepository< WorkSituation, Long> {
+public interface WorkSituationRepository extends CrudRepository< WorkSituation, Long>, JpaSpecificationExecutor<WorkSituation>  {
 
 	WorkSituation findByIdIs(int id);
 
 	List<WorkSituation> findByLoginIdIs(String loginId);
+
+	List<WorkSituation> findByCreateDateIs(Date createDate);
 
 	// SELECT * FROM work_situation where login_id= ?1 and create_date= ?2
 	WorkSituation findByLoginIdIsAndCreateDateIs(String loginId, Date createDate);
@@ -28,6 +31,12 @@ public interface WorkSituationRepository extends CrudRepository< WorkSituation, 
 
 	@Query("SELECT w FROM WorkSituation w where w.loginId= ?1 and YEAR(w.createDate)= ?2 and MONTH(w.createDate)= ?3 and DAY(w.createDate)= ?4")
 	List<WorkSituation> findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(String loginId, int year, int month, int date);
+
+	@Query("SELECT w FROM WorkSituation w where w.createDate = ?1 and length(w.workSitu) = ?2")
+	List<WorkSituation> findByCreateDateIsAndWorkSituLengthIs(Date date, int num);
+
+	@Query("SELECT w FROM WorkSituation w where w.createDate != ?1 and length(w.workSitu) != ?2")
+	List<WorkSituation> findByCreateDateIsNotOrWorkSituLengthIsNot(Date date, int num);
 
 	@Modifying
 	@Query("update WorkSituation w set w.workSitu = ?1, w.workEnd = ?2, w.breakTime = ?3, w.workTime = ?4, w.overtime = ?5  where w.loginId = ?6 and w.createDate = ?7")

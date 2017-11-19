@@ -15,7 +15,9 @@ import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.example.demo.model.SalaryMaster;
 import com.example.demo.model.User;
@@ -38,8 +40,6 @@ import com.example.demo.repository.WorkSituationRepository;
 @Component
 @ComponentScan("common")
 public class UtilLogic {
-
-
 
 	/**
 	 * パスワードを暗号化するメソッド
@@ -239,9 +239,11 @@ public class UtilLogic {
 	 * @param month
 	 * @return int
 	 */
-	public static int getMonthlySalary(String loginId, String position, int year, int month, WorkSituationRepository workSituationRepository, SalaryRepository salaryRepository) {
+	public static int getMonthlySalary(String loginId, String position, int year, int month,
+			WorkSituationRepository workSituationRepository, SalaryRepository salaryRepository) {
 		List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
-		workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIs(loginId, year, month);
+		workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIs(loginId, year,
+				month);
 
 		// 月の総勤務時間と総残業時間を変数に代入
 		String totalWorkTime = totalWorkTime(workSituationList);
@@ -252,7 +254,8 @@ public class UtilLogic {
 		int totalWorkTimeInt = stringTimeToInt(totalWorkTime);
 		int totalOvertimeInt = stringTimeToInt(totalOvertime);
 		int diffTotalTimeInt = timeSubtraction(totalWorkTimeInt, totalOvertimeInt);
-		int salary = (int) (calSalary(diffTotalTimeInt, position, salaryRepository) + calOvertimeSalary(totalOvertimeInt, position, salaryRepository));
+		int salary = (int) (calSalary(diffTotalTimeInt, position, salaryRepository)
+				+ calOvertimeSalary(totalOvertimeInt, position, salaryRepository));
 
 		return salary;
 	}
@@ -449,9 +452,11 @@ public class UtilLogic {
 		int userNumber = userList.size();
 
 		// 必要なページ数を計算しreturn
-		int totalPageNumber = 0;
+		int totalPageNumber = 1;
 		if (userNumber % userNumberPerPage == 0) {
-			totalPageNumber = userNumber / userNumberPerPage;
+			if(userNumber != 0) {
+				totalPageNumber = userNumber / userNumberPerPage;
+			}
 		} else {
 			totalPageNumber = userNumber / userNumberPerPage + 1;
 		}
@@ -652,7 +657,8 @@ public class UtilLogic {
 	}
 
 	public static void setEditHistory(String loginId, String time, String timeBefore, int createDateYear,
-			int createDateMonth, int createDateDate, WorkSituationEditRepository workSituationEditRepository, String timeName) {
+			int createDateMonth, int createDateDate, WorkSituationEditRepository workSituationEditRepository,
+			String timeName) {
 
 		// テーブルへの挿入は時間を変更した時のみ行う
 		if (!time.equals(timeBefore)) {
@@ -674,9 +680,46 @@ public class UtilLogic {
 		}
 	}
 
-	public static List<User> search(String loginId, String name, String position, Date birthDateFrom, Date birthDateTo, UserRepository userRepository){
+	public static List<User> search(String loginId, String name, String position, Date birthDateFrom, Date birthDateTo,
+			UserRepository userRepository) {
 		List<User> userList = userRepository.findAll();
 		return userList;
+	}
+
+	/**
+	 * 指定文字がログインIDと一致するユーザーを検索する。
+	 */
+	public static Specification<User> loginIdIs(String loginId) {
+		return StringUtils.isEmpty(loginId) ? null : (root, query, cb) -> {
+			return cb.equal(root.get("loginId"), loginId);
+		};
+	}
+
+	/**
+	 * 指定文字をユーザー名に含むユーザーを検索する。
+	 */
+	public static Specification<User> nameContains(String name) {
+		return StringUtils.isEmpty(name) ? null : (root, query, cb) -> {
+			return cb.like(root.get("name"), "%" + name + "%");
+		};
+	}
+
+	/**
+	 * 指定文字が役職と一致するユーザーを検索する。
+	 */
+	public static Specification<User> positionIs(String position) {
+		return StringUtils.isEmpty(position) ? null : (root, query, cb) -> {
+			return cb.equal(root.get("position"), position);
+		};
+	}
+
+	/**
+	 * 指定文字が役職と一致するユーザーを検索する。
+	 */
+	public static Specification<User> birthDateBetween(String birthDateFrom, String birthDateTo) {
+		return StringUtils.isEmpty(birthDateFrom) ? null : (root, query, cb) -> {
+			return cb.between(root.get("position"), birthDateFrom, birthDateTo);
+		};
 	}
 
 

@@ -8,8 +8,10 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,6 +22,7 @@ import com.example.demo.common.UtilLogic;
 import com.example.demo.form.UserListForm;
 import com.example.demo.model.PositionMaster;
 import com.example.demo.model.User;
+import com.example.demo.model.WorkSituation;
 import com.example.demo.repository.PositionRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkSituationRepository;
@@ -121,17 +124,59 @@ public class UserListController {
 	@PostMapping
 	public String post(@Validated @ModelAttribute UserListForm userListForm, Model model) {
 
-		List<User> userList = UtilLogic.search(userListForm.getLoginId(), userListForm.getName(),
-				userListForm.getPosition(), Date.valueOf(userListForm.getBirthDateFrom()),
-				Date.valueOf(userListForm.getBirthDateTo()), userRepository);
+		List<User> userList = new ArrayList<User>();
+		Date now = new Date(System.currentTimeMillis());
+		if (StringUtils.isEmpty(userListForm.getWorkSituation())) {
+			// ユーザーを検索し、userListに代入
+			userList = userRepository.findAll(Specifications.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
+					.and(UtilLogic.nameContains(userListForm.getName()))
+					.and(UtilLogic.positionIs(userListForm.getPosition()))
+					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
+		} else if(userListForm.getWorkSituation().equals("勤務中")){
+			List<User> userList1 = userRepository.findAll(Specifications
+					.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
+					.and(UtilLogic.nameContains(userListForm.getName()))
+					.and(UtilLogic.positionIs(userListForm.getPosition()))
+					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
 
-		// ユーザーを検索し、userListに代入
-		// List<User> userList =
-		// userRepository.findByLoginIdIsAndNameContainingAndPositionIsAndBirthDateBetween(
-		// userListForm.getLoginId(), userListForm.getName(),
-		// userListForm.getPosition(),
-		// Date.valueOf(userListForm.getBirthDateFrom()),
-		// Date.valueOf(userListForm.getBirthDateTo()));
+			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 2);
+
+			for (User user : userList1) {
+				boolean result = false;
+				for (WorkSituation workSituation : workSituationList) {
+					if (workSituation.getLoginId().equals(user.getLoginId())) {
+						result = true;
+					}
+				}
+				if (result) {
+					userList.add(userRepository.findByLoginIdIs(user.getLoginId()));
+				}
+			}
+
+		}else {
+			List<User> userList1 = userRepository.findAll(Specifications
+					.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
+					.and(UtilLogic.nameContains(userListForm.getName()))
+					.and(UtilLogic.positionIs(userListForm.getPosition()))
+					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
+
+			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 2);
+
+			for (User user : userList1) {
+				boolean result = true;
+				for (WorkSituation workSituation : workSituationList) {
+					if (workSituation.getLoginId().equals(user.getLoginId())) {
+						result = false;
+					}
+				}
+				if (result) {
+					userList.add(userRepository.findByLoginIdIs(user.getLoginId()));
+				}
+			}
+
+		}
+
+		userList = UtilLogic.userListSort(userList, workSituationRepository);
 
 		// リクエストパラメータを保存
 		int userNumberPerPage = 5;
@@ -147,18 +192,25 @@ public class UserListController {
 		model.addAttribute("birth_date_from", userListForm.getBirthDateFrom());
 		model.addAttribute("birth_date_to", userListForm.getBirthDateTo());
 		model.addAttribute("workSituation", userListForm.getWorkSituation());
+		model.addAttribute("workSituationRepository", workSituationRepository);
+		model.addAttribute("utilLogic", new UtilLogic());
 
-		Date now = new Date(System.currentTimeMillis());
 		SimpleDateFormat y = new SimpleDateFormat("yyyy");
 		SimpleDateFormat m = new SimpleDateFormat("MM");
 		int year = Integer.parseInt(y.format(now));
 		int month = Integer.parseInt(m.format(now));
+		String startDateString = year + "-" + month + "-01";
+		String endDateString = year + "-" + month + "-31";
+		Date startDate = Date.valueOf(startDateString);
+		Date endDate = Date.valueOf(endDateString);
 
 		List<PositionMaster> positionList = positionRepository.findAll();
 		// リクエストパラメーターを保存
 		model.addAttribute("positionList", positionList);
 		model.addAttribute("year", year);
 		model.addAttribute("month", month);
+		model.addAttribute("startDate", startDate);
+		model.addAttribute("endDate", endDate);
 
 		// userList.htmlへフォワード
 		return "userList";
