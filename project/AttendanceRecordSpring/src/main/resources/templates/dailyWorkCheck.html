@@ -42,7 +42,7 @@
 												</ul>
 											</div>
 											<div>
-												<form action="DownloadCsv" method="post">
+												<form th:action="@{/DownloadDailyWorkSituationCsv.csv}" method="get">
 													<button class="btn btn-warning" type="submit">csvに出力</button>
 													<input type="hidden" th:value="${user.getId()}" name="id"/>
 													<input type="hidden" th:value="${year}" name="year"/>

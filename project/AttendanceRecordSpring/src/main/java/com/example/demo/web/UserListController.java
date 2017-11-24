@@ -139,8 +139,7 @@ public class UserListController {
 					.and(UtilLogic.positionIs(userListForm.getPosition()))
 					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
 
-			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 2);
-
+			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 6);
 			for (User user : userList1) {
 				boolean result = false;
 				for (WorkSituation workSituation : workSituationList) {
@@ -160,7 +159,7 @@ public class UserListController {
 					.and(UtilLogic.positionIs(userListForm.getPosition()))
 					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
 
-			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 2);
+			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 6);
 
 			for (User user : userList1) {
 				boolean result = true;

@@ -40,7 +40,7 @@
 												<a class="btn btn-danger" th:href="'WorkSituationDelete?id=' + ${user.getId()} + '&amp;year=' + ${year} + '&amp;month=' + ${month} + '&amp;date=nothing'">All Delete</a>
 											</div>
 											<div>
-												<form action="DownloadCsv" method="post">
+												<form th:action="@{/DownloadMonthlyWorkSituationCsv.csv}" method="get">
 													<button class="btn btn-warning" type="submit">csvに出力</button>
 													<input type="hidden" th:value="${user.getId()}" name="id"/>
 													<input type="hidden" th:value="${year}" name="year"/>

@@ -94,6 +94,28 @@ public class UtilLogic {
 	}
 
 	/**
+	 * String型の変数(yyyy-MM-dd)を受け取り、int型(yyyyMMdd)を返す
+	 *
+	 * @param dateString
+	 * @return int
+	 */
+	public static int stringDateToInt(String dateString) {
+		return Integer.parseInt(dateString.replaceAll("-", ""));
+	}
+
+	/**
+	 * Date型の変数(yyyy-MM-dd)を受け取り、int型(yyyyMMdd)を返す
+	 *
+	 * @param date
+	 * @return int
+	 */
+	public static int dateToInt(Date date) {
+		String dateString = new SimpleDateFormat("yyyy-MM-dd").format(date);
+		return Integer.parseInt(dateString.replaceAll("-", ""));
+	}
+
+
+	/**
 	 * int型の変数(HHmmss)を受け取り、String型(HH:mm:ss)で返す
 	 *
 	 * @param timeInt
@@ -714,11 +736,17 @@ public class UtilLogic {
 	}
 
 	/**
-	 * 指定文字が役職と一致するユーザーを検索する。
+	 * 指定文字の間に誕生日があるユーザーを検索する。
 	 */
 	public static Specification<User> birthDateBetween(String birthDateFrom, String birthDateTo) {
-		return StringUtils.isEmpty(birthDateFrom) ? null : (root, query, cb) -> {
-			return cb.between(root.get("position"), birthDateFrom, birthDateTo);
+		return StringUtils.isEmpty(birthDateFrom) && StringUtils.isEmpty(birthDateTo) ? null : (root, query, cb) -> {
+			if(StringUtils.isEmpty(birthDateFrom)) {
+				return cb.lessThanOrEqualTo(root.get("birthDate"), Date.valueOf(birthDateTo));
+			}else if(StringUtils.isEmpty(birthDateTo)) {
+				return cb.greaterThanOrEqualTo(root.get("birthDate"), Date.valueOf(birthDateFrom));
+			}else {
+				return cb.between(root.get("birthDate"), Date.valueOf(birthDateFrom), Date.valueOf(birthDateTo));
+			}
 		};
 	}
 

@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"ユーザー名", "月給"})
-public class MonthlySalary {
+public class MonthlySalaryCsv {
 	@JsonProperty("ユーザー名")
 	private String name;
 	@JsonProperty("月給")
 	private int monthlrSalary;
 
-	public MonthlySalary() {}
+	public MonthlySalaryCsv() {}
 
-	public MonthlySalary(String name, int monthlrSalary) {
+	public MonthlySalaryCsv(String name, int monthlrSalary) {
 		this.name = name;
 		this.monthlrSalary = monthlrSalary;
 	}
