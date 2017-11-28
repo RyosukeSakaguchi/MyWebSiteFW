@@ -5,17 +5,15 @@ import java.sql.Time;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"年", "月", "ユーザー名", "日付", "勤務状況", "勤務開始時間", "勤務終了時間", "休憩時間", "勤務時間", "残業時間", "総勤務時間", "総残業時間"})
+@JsonPropertyOrder({"年月", "ユーザー名", "日付", "勤務状況", "勤務開始時間", "勤務終了時間", "休憩時間", "勤務時間", "残業時間", "総勤務時間", "総残業時間"})
 public class MonthlyWorkSituationCsv {
 
-	@JsonProperty("年")
-	private int year;
-	@JsonProperty("月")
-	private int month;
+	@JsonProperty("年月")
+	private String yearAndMonth;
 	@JsonProperty("ユーザー名")
 	private String name;
 	@JsonProperty("日付")
-	private int date;
+	private String date;
 	@JsonProperty("勤務状況")
 	private String workSituation;
 	@JsonProperty("勤務開始時間")
@@ -35,9 +33,8 @@ public class MonthlyWorkSituationCsv {
 
 	public MonthlyWorkSituationCsv() {}
 
-	public MonthlyWorkSituationCsv(int year, int month, int date, String name, String workSituation, Time workStart, Time workEnd, Time breakTime, Time workTime, Time overtime, String totalWorkTime, String totalOvertime) {
-		this.year = year;
-		this.month = month;
+	public MonthlyWorkSituationCsv(String yearAndMonth, String date, String name, String workSituation, Time workStart, Time workEnd, Time breakTime, Time workTime, Time overtime) {
+		this.yearAndMonth = yearAndMonth;
 		this.date = date;
 		this.name = name;
 		this.workSituation = workSituation;
@@ -46,25 +43,26 @@ public class MonthlyWorkSituationCsv {
 		this.breakTime = breakTime;
 		this.workTime = workTime;
 		this.overtime = overtime;
+
+	}
+
+	public MonthlyWorkSituationCsv(String date, String workSituation, Time workStart, Time workEnd, Time breakTime, Time workTime, Time overtime) {
+		this.date = date;
+		this.workSituation = workSituation;
+		this.workStart = workStart;
+		this.workEnd = workEnd;
+		this.breakTime = breakTime;
+		this.workTime = workTime;
+		this.overtime = overtime;
+
+	}
+
+	public MonthlyWorkSituationCsv(String totalWorkTime, String totalOvertime) {
 		this.totalWorkTime = totalWorkTime;
 		this.totalOvertime = totalOvertime;
 	}
 
-	public int getYear() {
-		return year;
-	}
 
-	public void setYear(int year) {
-		this.year = year;
-	}
-
-	public int getMonth() {
-		return month;
-	}
-
-	public void setMonth(int month) {
-		this.month = month;
-	}
 
 	public String getName() {
 		return name;
@@ -74,11 +72,11 @@ public class MonthlyWorkSituationCsv {
 		this.name = name;
 	}
 
-	public int getDate() {
+	public String getDate() {
 		return date;
 	}
 
-	public void setDate(int date) {
+	public void setDate(String date) {
 		this.date = date;
 	}
 
@@ -144,6 +142,14 @@ public class MonthlyWorkSituationCsv {
 
 	public void setTotalOvertime(String totalOvertime) {
 		this.totalOvertime = totalOvertime;
+	}
+
+	public String getYearAndMonth() {
+		return yearAndMonth;
+	}
+
+	public void setYearAndMonth(String yearAndMonth) {
+		this.yearAndMonth = yearAndMonth;
 	}
 
 }

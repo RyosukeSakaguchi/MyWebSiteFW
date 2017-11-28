@@ -72,6 +72,7 @@ public class SignUpController {
 	public String post(@Validated @ModelAttribute SignUpForm signUpForm, BindingResult result, Model model) {
 
 		if (result.hasErrors()) {
+			model.addAttribute("errMsg", "入力に以下の誤りがあります");
 			return get(signUpForm, model);
 		}
 

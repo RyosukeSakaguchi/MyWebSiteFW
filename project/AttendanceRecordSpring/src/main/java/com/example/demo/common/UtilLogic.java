@@ -501,7 +501,7 @@ public class UtilLogic {
 	}
 
 	public static void workStart(String loginId, Time workStartMaster,
-			WorkSituationRepository workSituationRepository) {
+			WorkSituationRepository workSituationRepository, UserRepository userRepository) {
 
 		// 今日の日付を時間を取得
 		Date today = new Date(Calendar.getInstance().getTimeInMillis());
@@ -531,10 +531,15 @@ public class UtilLogic {
 
 		workSituationRepository.save(workSituation);
 
+		User user = new User();
+		user = userRepository.findByLoginIdIs(loginId);
+		user.setWorkSituationInt(1);
+		userRepository.save(user);
+
 	}
 
 	public static void workEnd(String loginId, Time breakTime, Time workEndMaster, Time workTimeMaster,
-			WorkSituationRepository workSituationRepository) {
+			WorkSituationRepository workSituationRepository, UserRepository userRepository) {
 		// 今日の日付を時間を取得
 		Date today = new Date(Calendar.getInstance().getTimeInMillis());
 		Time now = new Time(Calendar.getInstance().getTimeInMillis());
@@ -597,6 +602,11 @@ public class UtilLogic {
 		workSituation.setWorkTime(Time.valueOf(UtilLogic.intToStringTime(workTimeInt)));
 		workSituation.setOvertime(Time.valueOf(UtilLogic.intToStringTime(overtimeInt)));
 		workSituationRepository.save(workSituation);
+
+		User user = new User();
+		user = userRepository.findByLoginIdIs(loginId);
+		user.setWorkSituationInt(0);
+		userRepository.save(user);
 
 	}
 
@@ -749,6 +759,25 @@ public class UtilLogic {
 			}
 		};
 	}
+
+	public static Specification<User> workSituationIs(String workSituation) {
+		return StringUtils.isEmpty(workSituation) ? null : (root, query, cb) -> {
+			if(workSituation.equals("勤務中")) {
+				return cb.equal(root.get("workSituationInt"), 1);
+			}else{
+				return cb.equal(root.get("workSituationInt"), 0);
+			}
+
+		};
+	}
+
+	public static Specification<User> idIsNot(int id) {
+		return StringUtils.isEmpty(id) ? null : (root, query, cb) -> {
+				return cb.notEqual(root.get("id"), id);
+
+		};
+	}
+
 
 
 }

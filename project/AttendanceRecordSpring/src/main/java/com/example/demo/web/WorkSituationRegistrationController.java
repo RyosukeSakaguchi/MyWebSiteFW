@@ -23,6 +23,7 @@ import com.example.demo.common.UtilLogic;
 import com.example.demo.form.WorkSituationRegistrationForm;
 import com.example.demo.model.User;
 import com.example.demo.repository.TimeRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkSituationRepository;
 import com.example.demo.validation.WorkSituationRegistrationValidator;
 
@@ -32,6 +33,8 @@ public class WorkSituationRegistrationController {
 
 	@Autowired
 	HttpSession session;
+	@Autowired
+	private UserRepository userRepository;
 	@Autowired
 	private WorkSituationRepository workSituationRepository;
 	@Autowired
@@ -140,7 +143,7 @@ public class WorkSituationRegistrationController {
 		if (situation.equals("start")) {
 			// 勤務状況をテーブルに保存
 			Time workStartMaster = timeRepository.findByIdIs(1).getWorkStart();
-			UtilLogic.workStart(loginId, workStartMaster, workSituationRepository);
+			UtilLogic.workStart(loginId, workStartMaster, workSituationRepository, userRepository);
 			// RegistrationCompleteへリダイレクト
 			return "redirect:/RegistrationComplete?situation=start";
 
@@ -150,7 +153,7 @@ public class WorkSituationRegistrationController {
 			Time breakTime = Time.valueOf(workSituationRegistrationForm.getBreakTime());
 			Time workEndMaster = timeRepository.findByIdIs(1).getWorkEnd();
 			Time workTimeMaster = timeRepository.findByIdIs(1).getWorkTime();
-			UtilLogic.workEnd(loginId, breakTime, workEndMaster, workTimeMaster, workSituationRepository);
+			UtilLogic.workEnd(loginId, breakTime, workEndMaster, workTimeMaster, workSituationRepository, userRepository);
 
 			// RegistrationCompleteへリダイレクト
 			return "redirect:/RegistrationComplete?situation=end";

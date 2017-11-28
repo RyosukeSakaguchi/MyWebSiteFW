@@ -3,6 +3,8 @@ package com.example.demo.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -27,6 +29,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 public class DownloadDailyWorkSituationCsvController {
 
 	@Autowired
+	HttpSession session;
+	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private WorkSituationRepository workSituationRepository;
@@ -35,31 +39,40 @@ public class DownloadDailyWorkSituationCsvController {
 			+ "; charset=Shift_JIS; Content-Disposition: attachment")
 	@ResponseBody
 	public Object getCsv(@ModelAttribute DownloadCsvForm downloadCsvForm, Model model) throws JsonProcessingException {
-		// リクエストスコープからパラメーターを取得
-		int date = downloadCsvForm.getDate();
-		int id = downloadCsvForm.getId();
-		int year = downloadCsvForm.getYear();
-		int month = downloadCsvForm.getMonth();
+		// HttpSessionインスタンスの取得
+		User loginUser = (User) session.getAttribute("loginUser");
+		// セッションにログイン情報があるかないかで分岐
+		if (loginUser == null) {
+			// LoginScreenへリダイレクト
+			return "redirect:/LoginScreen";
+		} else {
+			// リクエストスコープからパラメーターを取得
+			int date = downloadCsvForm.getDate();
+			int id = downloadCsvForm.getId();
+			int year = downloadCsvForm.getYear();
+			int month = downloadCsvForm.getMonth();
 
-		// パラメータidに対応するworkSituationListインスタンスをリクエストスコープに保存
-		User user = new User();
-		user = userRepository.findByIdIs(id);
-		List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
-		workSituationList = workSituationRepository
-				.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(user.getLoginId(), year, month, date);
-		model.addAttribute("workSituationList", workSituationList);
+			// パラメータidに対応するworkSituationListインスタンスをリクエストスコープに保存
+			User user = new User();
+			user = userRepository.findByIdIs(id);
+			List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
+			workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIsAndCreateDateIs(
+					user.getLoginId(), year, month, date);
+			model.addAttribute("workSituationList", workSituationList);
 
-		List<DailyWorkSituationCsv> dailyWorkSituationCsvList = new ArrayList<DailyWorkSituationCsv>();
-		for (WorkSituation workSituation : workSituationList) {
-			dailyWorkSituationCsvList.add(new DailyWorkSituationCsv(year, month, date, user.getName(),
-					workSituation.getWorkSitu(), workSituation.getWorkStart(), workSituation.getWorkEnd(),
-					workSituation.getBreakTime(), workSituation.getWorkTime(), workSituation.getOvertime()));
+			List<DailyWorkSituationCsv> dailyWorkSituationCsvList = new ArrayList<DailyWorkSituationCsv>();
+			for (WorkSituation workSituation : workSituationList) {
+				dailyWorkSituationCsvList.add(new DailyWorkSituationCsv(year + "年" + month + "月" + date + "日", user.getName(),
+						workSituation.getWorkSitu(), workSituation.getWorkStart(), workSituation.getWorkEnd(),
+						workSituation.getBreakTime(), workSituation.getWorkTime(), workSituation.getOvertime()));
+			}
+
+			// 日の勤務状況をcsvに出力
+			CsvMapper mapper = new CsvMapper();
+			CsvSchema schema = mapper.schemaFor(DailyWorkSituationCsv.class).withHeader();
+			return mapper.writer(schema).writeValueAsString(dailyWorkSituationCsvList);
+
 		}
-
-		// 日の勤務状況をcsvに出力
-		CsvMapper mapper = new CsvMapper();
-		CsvSchema schema = mapper.schemaFor(DailyWorkSituationCsv.class).withHeader();
-		return mapper.writer(schema).writeValueAsString(dailyWorkSituationCsvList);
 
 	}
 

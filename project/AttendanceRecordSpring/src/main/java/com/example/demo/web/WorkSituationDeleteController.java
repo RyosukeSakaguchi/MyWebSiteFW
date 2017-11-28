@@ -169,7 +169,7 @@ public class WorkSituationDeleteController {
 		model.addAttribute("id", workSituationDeleteForm.getId());
 
 		// UserListへリダイレクト
-		return "redirect:/UserList";
+		return "redirect:/UserDetail?id=" +  workSituationDeleteForm.getId();
 
 	}
 

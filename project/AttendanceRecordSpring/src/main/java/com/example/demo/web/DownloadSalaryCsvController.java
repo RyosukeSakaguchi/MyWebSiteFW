@@ -3,6 +3,8 @@ package com.example.demo.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -28,6 +30,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 public class DownloadSalaryCsvController {
 
 	@Autowired
+	HttpSession session;
+	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private WorkSituationRepository workSituationRepository;
@@ -38,33 +42,48 @@ public class DownloadSalaryCsvController {
 			+ "; charset=Shift_JIS; Content-Disposition: attachment")
 	@ResponseBody
 	public Object getCsv(@ModelAttribute DownloadCsvForm downloadCsvForm, Model model) throws JsonProcessingException {
-		// リクエストスコープからパラメーターを取得
-		String yearAndMonth = downloadCsvForm.getYearAndMonth();
+		// HttpSessionインスタンスの取得
+		User loginUser = (User) session.getAttribute("loginUser");
+		// セッションにログイン情報があるかないかで分岐
+		if (loginUser == null) {
+			// LoginScreenへリダイレクト
+			return "redirect:/LoginScreen";
+		} else {
+			// リクエストスコープからパラメーターを取得
+			String yearAndMonth = downloadCsvForm.getYearAndMonth();
 
-		// 年と月が入力されていない時はUserListへリダイレクト
-		if (yearAndMonth.replaceAll("-", "") == "") {
-			model.addAttribute("salaryErrMsg", "入力に誤りがあります");
+			// 年と月が入力されていない時はUserListへリダイレクト
+			if (yearAndMonth.replaceAll("-", "") == "") {
+				model.addAttribute("salaryErrMsg", "入力に誤りがあります");
 
-			// UserListへリダイレクト
-			return "redirect:/UserList";
+				// UserListへリダイレクト
+				return "redirect:/UserList";
+			}
+
+			// ユーザーリストと年と月に対応する月給をcsvに出力
+			int year = UtilLogic.yearAndMonthToYear(yearAndMonth);
+			int month = UtilLogic.yearAndMonthToMonth(yearAndMonth);
+			List<User> userList = new ArrayList<User>();
+			userList = userRepository.findAll();
+			userList = UtilLogic.userListSort(userList, workSituationRepository);
+			List<MonthlySalaryCsv> monthlySalaryList = new ArrayList<MonthlySalaryCsv>();
+
+			boolean result = true;
+			for (User user : userList) {
+				if(result) {
+					monthlySalaryList.add(new MonthlySalaryCsv(year + "年" + month + "月", user.getName(), UtilLogic.getMonthlySalary(user.getLoginId(),
+							user.getPosition(), year, month, workSituationRepository, salaryRepository) + "円"));
+					result = false;
+				}else {
+					monthlySalaryList.add(new MonthlySalaryCsv(user.getName(), UtilLogic.getMonthlySalary(user.getLoginId(),
+							user.getPosition(), year, month, workSituationRepository, salaryRepository) + "円"));
+				}
+			}
+
+			CsvMapper mapper = new CsvMapper();
+			CsvSchema schema = mapper.schemaFor(MonthlySalaryCsv.class).withHeader();
+			return mapper.writer(schema).writeValueAsString(monthlySalaryList);
 		}
-
-		// ユーザーリストと年と月に対応する月給をcsvに出力
-		int year = UtilLogic.yearAndMonthToYear(yearAndMonth);
-		int month = UtilLogic.yearAndMonthToMonth(yearAndMonth);
-		List<User> userList = new ArrayList<User>();
-		userList = userRepository.findAll();
-		userList = UtilLogic.userListSort(userList, workSituationRepository);
-		List<MonthlySalaryCsv> monthlySalaryList = new ArrayList<MonthlySalaryCsv>();
-
-		for (User user : userList) {
-			monthlySalaryList.add(new MonthlySalaryCsv(user.getName(), UtilLogic.getMonthlySalary(user.getLoginId(),
-					user.getPosition(), year, month, workSituationRepository, salaryRepository)));
-		}
-
-		CsvMapper mapper = new CsvMapper();
-		CsvSchema schema = mapper.schemaFor(MonthlySalaryCsv.class).withHeader();
-		return mapper.writer(schema).writeValueAsString(monthlySalaryList);
 	}
 
 }

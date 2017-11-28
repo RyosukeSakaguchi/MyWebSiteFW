@@ -9,7 +9,6 @@ public class UserListForm {
 	private String birthDateTo;
 	private String workSituation;
 	private int pageNumber;
-	private int[] userIdList;
 	private int[] delListId;
 
 	public String getLoginId() {
@@ -53,12 +52,6 @@ public class UserListForm {
 	}
 	public void setPageNumber(int pageNumber) {
 		this.pageNumber = pageNumber;
-	}
-	public int[] getUserIdList() {
-		return userIdList;
-	}
-	public void setUserIdList(int[] userIdList) {
-		this.userIdList = userIdList;
 	}
 	public int[] getDelListId() {
 		return delListId;

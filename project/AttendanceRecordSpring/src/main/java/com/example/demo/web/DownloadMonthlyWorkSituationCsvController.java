@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 public class DownloadMonthlyWorkSituationCsvController {
 
 	@Autowired
+	HttpSession session;
+	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private WorkSituationRepository workSituationRepository;
@@ -37,36 +41,57 @@ public class DownloadMonthlyWorkSituationCsvController {
 			+ "; charset=Shift_JIS; Content-Disposition: attachment")
 	@ResponseBody
 	public Object getCsv(@ModelAttribute DownloadCsvForm downloadCsvForm, Model model) throws JsonProcessingException {
-		// リクエストスコープからパラメーターを取得
-		int id = downloadCsvForm.getId();
-		int year = downloadCsvForm.getYear();
-		int month = downloadCsvForm.getMonth();
 
-		// パラメータidに対応するworkSituationListインスタンスをリクエストスコープに保存
-		User user = new User();
-		user = userRepository.findByIdIs(id);
-		List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
-		workSituationList = workSituationRepository.findByLoginIdIsAndCreateYearIsAndCreateMonthIs(user.getLoginId(), year, month);
-		model.addAttribute("workSituationList", workSituationList);
+		// HttpSessionインスタンスの取得
+		User loginUser = (User) session.getAttribute("loginUser");
+		// セッションにログイン情報があるかないかで分岐
+		if (loginUser == null) {
+			// LoginScreenへリダイレクト
+			return "redirect:/LoginScreen";
+		} else {
+			// リクエストスコープからパラメーターを取得
+			int id = downloadCsvForm.getId();
+			int year = downloadCsvForm.getYear();
+			int month = downloadCsvForm.getMonth();
 
-		// ユーザーの総勤務時間と総残業時間を取得
-		String titalWorkTime = UtilLogic.totalWorkTime(workSituationList);
-		String titalOvertime = UtilLogic.totalOvertime(workSituationList);
+			// パラメータidに対応するworkSituationListインスタンスをリクエストスコープに保存
+			User user = new User();
+			user = userRepository.findByIdIs(id);
+			List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
+			workSituationList = workSituationRepository
+					.findByLoginIdIsAndCreateYearIsAndCreateMonthIs(user.getLoginId(), year, month);
+			model.addAttribute("workSituationList", workSituationList);
 
-		List<MonthlyWorkSituationCsv> monthlyWorkSituationCsvList = new ArrayList<MonthlyWorkSituationCsv>();
-		for (WorkSituation workSituation : workSituationList) {
-			SimpleDateFormat sdf = new SimpleDateFormat("dd");
-			int CreateDate = Integer.parseInt(sdf.format(workSituation.getCreateDate()));
+			// ユーザーの総勤務時間と総残業時間を取得
+			String titalWorkTime = UtilLogic.totalWorkTime(workSituationList);
+			String titalOvertime = UtilLogic.totalOvertime(workSituationList);
 
-			monthlyWorkSituationCsvList.add(new MonthlyWorkSituationCsv(year, month, CreateDate, user.getName(),
-					workSituation.getWorkSitu(), workSituation.getWorkStart(), workSituation.getWorkEnd(),
-					workSituation.getBreakTime(), workSituation.getWorkTime(), workSituation.getOvertime(), titalWorkTime, titalOvertime));
+			List<MonthlyWorkSituationCsv> monthlyWorkSituationCsvList = new ArrayList<MonthlyWorkSituationCsv>();
+			boolean result = true;
+			for (WorkSituation workSituation : workSituationList) {
+				SimpleDateFormat sdf = new SimpleDateFormat("dd");
+				int createDate = Integer.parseInt(sdf.format(workSituation.getCreateDate()));
+
+				if (result) {
+					monthlyWorkSituationCsvList.add(new MonthlyWorkSituationCsv(year + "年" + month + "月", String.valueOf(createDate),
+							user.getName(), workSituation.getWorkSitu(), workSituation.getWorkStart(),
+							workSituation.getWorkEnd(), workSituation.getBreakTime(), workSituation.getWorkTime(),
+							workSituation.getOvertime()));
+					result = false;
+				} else {
+					monthlyWorkSituationCsvList.add(new MonthlyWorkSituationCsv(String.valueOf(createDate), workSituation.getWorkSitu(),
+							workSituation.getWorkStart(), workSituation.getWorkEnd(), workSituation.getBreakTime(),
+							workSituation.getWorkTime(), workSituation.getOvertime()));
+				}
+
+			}
+			monthlyWorkSituationCsvList.add(new MonthlyWorkSituationCsv(titalWorkTime, titalOvertime));
+
+			// 月の勤務状況をcsvに出力
+			CsvMapper mapper = new CsvMapper();
+			CsvSchema schema = mapper.schemaFor(MonthlyWorkSituationCsv.class).withHeader();
+			return mapper.writer(schema).writeValueAsString(monthlyWorkSituationCsvList);
 		}
-
-		// 月の勤務状況をcsvに出力
-		CsvMapper mapper = new CsvMapper();
-		CsvSchema schema = mapper.schemaFor(MonthlyWorkSituationCsv.class).withHeader();
-		return mapper.writer(schema).writeValueAsString(monthlyWorkSituationCsvList);
 
 	}
 

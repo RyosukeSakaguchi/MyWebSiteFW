@@ -53,20 +53,20 @@
 											<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">役職</label>
 											<div class="col-sm-3">
 												<select class="form-control" name="position" style="background: white; height: 35px; width: 200px;">
-													<div th:if="${position == null}">
+													<p th:if="${position == null}">
 														<option th:value="null" ></option>
 														<tr th:inline="text" th:each="position : ${positionList}">
 															<option th:value="${position.position}" >[[${position.position}]]</option>
 														</tr>
-													</div>
+													</p>
 													<p th:unless="${position == null}">
 														<option th:value="null" ></option>
-														<div th:inline="text" th:each="position : ${positionList}">
-															<p th:if="${position.getPosition() == position}">
-																<option th:value="${position.position}" selected="selected" >[[${position.getPosition()}]]</option>
+														<div th:inline="text" th:each="pos : ${positionList}">
+															<p th:if="${pos.position.equals(position)}">
+																<option th:value="${pos.position}" selected="selected" >[[${pos.position}]]</option>
 															</p>
-															<p th:unless="${position.getPosition() == position}">
-																<option th:value="${position.position}" >[[${position.getPosition()}]]</option>
+															<p th:unless="${pos.position.equals(position)}">
+																<option th:value="${pos.position}" >[[${pos.position}]]</option>
 															</p>
 														</div>
 													</p>
@@ -76,11 +76,11 @@
 										<div class="form-group" style="width:800px;">
 											<label for="inputName" class="col-sm-2 control-label" style="width: 200px;">生年月日</label>
 											<div class="col-sm-3">
-												<input type="date" class="form-control"  name="birthDateFrom" th:field="*{birthDateFrom}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+												<input type="date" class="form-control"  th:value="*{birthDateFrom}" name="birthDateFrom" th:field="*{birthDateFrom}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 											</div>
 											<label for="inputName" class="col-sm-2 control-label" style="width: 50px;">　〜</label>
 											<div class="col-sm-3">
-												<input type="date" class="form-control"  name="birthDateTo" th:field="*{birthDateTo}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
+												<input type="date" class="form-control"  th:value="*{birthDateTo}" name="birthDateTo" th:field="*{birthDateTo}" onblur="isEmpty(this)" style="background: white; height: 35px; width: 200px;"/>
 											</div>
 										</div><br/><br/>
 										<div class="form-group">
@@ -133,98 +133,88 @@
 				<div class="container">
 					<font size="5" color="red"><div th:text="${noCheckMsg}" /></font><br/><br/>
 					<div class="wrapper" style="justify-content:center;">
-						<div th:if="${pageNumber != 1}">
+						<div th:if="${page.getNumber() != 0}">
 							<div class="wrapper">
 								<div >
 									<form action="UserList"  method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px ; background-color : rgb(249, 249, 249); border-style: none; "><span class="icon-angle-double-left" aria-hidden="true"></span></button>
-										<input type="hidden" th:name="pageNumber" th:value="1"/>
+										<input type="hidden" th:name="pageNumber" th:value="0"/>
 										<input type="hidden"  th:name="login_id" th:value="${loginId}"/>
 										<input type="hidden" th:name="name" th:value="${name}"/>
 										<input type="hidden" th:name="position" th:value="${position}"/>
 										<input type="hidden" th:name="birth_date_from" th:value="${birthDateFrom}"/>
 										<input type="hidden" th:name="birth_date_to" th:value="${birthDateTo}"/>
 										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
-										<div th:inline="text" th:each="user, stat : ${userList}">
-											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
-										</div>
 									</form>
 								</div>　
 								<div >
 									<form action="UserList" method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-left" aria-hidden="true"></span></button>
-										<input type="hidden" th:name="pageNumber" th:value="${pageNumber}-1"/>
+										<input type="hidden" th:name="pageNumber" th:value="${page.getNumber()}-1"/>
 										<input type="hidden"  th:name="login_id" th:value="${loginId}"/>
 										<input type="hidden" th:name="name" th:value="${name}"/>
 										<input type="hidden" th:name="position" th:value="${position}"/>
 										<input type="hidden" th:name="birth_date_from" th:value="${birthDateFrom}"/>
 										<input type="hidden" th:name="birth_date_to" th:value="${birthDateTo}"/>
 										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
-										<div th:inline="text" th:each="user, stat : ${userList}">
-											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
-										</div>
 									</form>
 								</div>
 							</div>
 						</div>
-						<div th:unless="${pageNumber != 1}">
+						<div th:unless="${page.getNumber() != 0}">
 							<div></div>
 							<div></div>
 						</div>
 						<div >
-							<div th:inline="text">　 ページ[[${pageNumber}]]/[[${totalPageNumber}]]　</div>
+							<div th:inline="text">　 ページ[[${page.getNumber()+1}]]/[[${page.getTotalPages()}]]　</div>
 						</div>
-						<div th:if="${pageNumber != totalPageNumber}">
+						<div th:if="${page.getNumber() != page.getTotalPages()-1}">
 							<div class="wrapper">
 								<div>
 									<form th:action="@{/UserList}" method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px ;background-color : rgb(249, 249, 249); border-style: none;">
 											<span class="icon-angle-right" aria-hidden="true"></span>
 										</button>
-										<input type="hidden" th:name="pageNumber" th:value="${pageNumber}+1"/>
+										<input type="hidden" th:name="pageNumber" th:value="${page.getNumber()}+1"/>
 										<input type="hidden"  th:name="loginId" th:value="${loginId}"/>
 										<input type="hidden" th:name="name" th:value="${name}"/>
 										<input type="hidden" th:name="position" th:value="${position}"/>
 										<input type="hidden" th:name="birthDateFrom" th:value="${birthDateFrom}"/>
 										<input type="hidden" th:name="birthDateTo" th:value="${birthDateTo}"/>
 										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
-										<div th:inline="text" th:each="user, stat : ${userList}">
-											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
-										</div>
 									</form>
 								</div>　
 								<div>
 									<form action="UserList"  method="get">
 										<button  role="button" type="submit" style ="color : #85919d; width : 10px; background-color : rgb(249, 249, 249); border-style: none;"><span class="icon-angle-double-right" aria-hidden="true"></span></button>
-										<input type="hidden" th:name="pageNumber" th:value="${totalPageNumber}"/>
+										<input type="hidden" th:name="pageNumber" th:value="${page.getTotalPages()}"/>
 										<input type="hidden"  th:name="login_id" th:value="${loginId}"/>
 										<input type="hidden" th:name="name" th:value="${name}"/>
 										<input type="hidden" th:name="position" th:value="${position}"/>
 										<input type="hidden" th:name="birth_date_from" th:value="${birthDateFrom}"/>
 										<input type="hidden" th:name="birth_date_to" th:value="${birthDateTo}"/>
 										<input type="hidden" th:name="workSituation" th:value="${workSituation}"/>
-										<div th:inline="text" th:each="user, stat  : ${userList}">
-											<input type="hidden" th:name="|userIdList[${stat.index}]|" th:value="${user.id}" />
-										</div>
 									</form>
 								</div>
 							</div>
 						</div>
-						<div th:unless="${pageNumber != totalPageNumber}">
+						<div th:unless="${page.getNumber() != page.getTotalPages()-1}">
 							<div></div>
 							<div></div>
 						</div>
 					</div>
 					<form name="form1" th:action="@{/UserDelete}" method="get">
 					<input type="hidden" name="id" th:value="0"/>
-						<div class="wrapper">
-							<div>
-								<input type="button" class="btn btn-primary" th:value="全て選択" onClick="BoxChecked(true);"/>
-								<input type="button" class="btn btn-warning" th:value="全て未選択" onClick="BoxChecked(false);" />
-							</div>
-							<div>
-								<button class="btn btn-danger" type="submit">選択したユーザーを削除</button>
-								<a class="btn btn-danger" href="UserDelete?id=all">全ユーザーを削除</a>
+						<div th:unless="${page.getContent().size() == 1}">
+							<div class="wrapper">
+								<div>
+									<input type="button" class="btn btn-primary" th:value="全て選択" onClick="BoxChecked(true);"/>
+									<input type="button" class="btn btn-warning" th:value="全て未選択" onClick="BoxChecked(false);" />
+								</div>
+								<div>
+									<button class="btn btn-danger" type="submit">選択したユーザーを削除</button>
+									<a class="btn btn-danger" href="UserDelete?id=all">全ユーザーを削除</a>
+								</div>
 							</div>
 						</div><br/><br/>
 						<div class="row">
@@ -242,87 +232,40 @@
 										</tr>
 									</thead>
 									<tbody>
-										<div th:if="${userNumberPerPage * pageNumber &lt;= userList.size()}">
-											<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1), userNumberPerPage * pageNumber - 1)}">
-												<td></td>
-												<td>
-													<input type="checkbox" name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
-													<input type="hidden" th:name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
+										<tr th:each="user : ${page.getContent()}" th:object="${user}">
+											<td></td>
+											<td>
+												<input type="checkbox" th:name="delListId" th:value="${user.getId()}"/>
+											</td>
+											<td>
+												<div th:inline="text">[[${user.getLoginId()}]]</div>
+											</td>
+											<td>
+												<div th:inline="text">[[${user.getName()}]]</div>
+											</td>
+											<td>
+												<div th:inline="text">[[${user.getFormatBirthDate()}]]</div>
+											</td>
+											<div th:if="${!utilLogic.isWorking(user.getLoginId(), workSituationRepository)}">
+												<td>帰宅
+													<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(user.getLoginId(), startDate, endDate))) ge 500000}">
+														<font size="3" color="red">　残業時間超過</font>
+													</p>
 												</td>
-												<td>
-													<div th:inline="text">[[${userList.get(seq).getLoginId()}]]</div>
-												</td>
-												<td>
-													<div th:inline="text">[[${userList.get(seq).getName()}]]</div>
-												</td>
-												<td>
-													<div th:inline="text">[[${userList.get(seq).getFormatBirthDate()}]]</div>
-												</td>
-												<div th:if="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
-													<td>帰宅
-														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
-															<font size="3" color="red">　残業時間超過</font>
-														</p>
-													</td>
-												</div>
-												<div th:unless="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
-													<td>勤務中
-														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
-															<font size="3" color="red">　残業時間超過</font>
-														</p>
-													</td>
-												</div>
-												<td>
-													<a class="btn btn-primary" th:href="'UserDetail?id=' + ${userList.get(seq).getId()}">詳細</a>
-													<a class="btn btn-success" th:href="'UserUpdate?id=' + ${userList.get(seq).getId()}">更新</a>
-													<a class="btn btn-danger" th:href="'UserDelete?id=' + ${userList.get(seq).getId()}">削除</a>
-												</td>
-											</tr>
-										</div>
-										<div th:unless="${userNumberPerPage * pageNumber &lt;= userList.size()}">
-											<div th:if="${userNumberPerPage * (pageNumber - 1) &gt; (userList.size() - 1)}">
-												<tr>
-													<td></td>
-												</tr>
 											</div>
-											<div th:unless="${userNumberPerPage * (pageNumber - 1) &gt; (userList.size() - 1)}">
-												<tr th:each="seq : ${#numbers.sequence(userNumberPerPage * (pageNumber - 1), userList.size() - 1)}">
-												<td></td>
-												<td>
-													<input type="checkbox" name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
-													<input type="hidden" th:name="|delListId[${seq}]|" th:value="${userList.get(seq).getId()}" onClick="DisChecked();"/>
+											<div th:unless="${!utilLogic.isWorking(user.getLoginId(), workSituationRepository)}">
+												<td>勤務中
+													<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(user.getLoginId(), startDate, endDate))) ge 500000}">
+														<font size="3" color="red">　残業時間超過</font>
+													</p>
 												</td>
-												<td>
-													<div th:inline="text">[[${userList.get(seq).getLoginId()}]]</div>
-												</td>
-												<td>
-													<div th:inline="text">[[${userList.get(seq).getName()}]]</div>
-												</td>
-												<td>
-													<div th:inline="text">[[${userList.get(seq).getFormatBirthDate()}]]</div>
-												</td>
-												<div th:if="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
-													<td>帰宅
-														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
-															<font size="3" color="red">　残業時間超過</font>
-														</p>
-													</td>
-												</div>
-												<div th:unless="${!utilLogic.isWorking(userList.get(seq).getLoginId(), workSituationRepository)}">
-													<td>勤務中
-														<p th:if="${utilLogic.stringTimeToInt(utilLogic.totalOvertime(workSituationRepository.findByLoginIdIsAndCreateDateBetween(userList.get(seq).getLoginId(), startDate, endDate))) ge 500000}">
-															<font size="3" color="red">　残業時間超過</font>
-														</p>
-													</td>
-												</div>
-												<td>
-													<a class="btn btn-primary" th:href="'UserDetail?id=' + ${userList.get(seq).getId()}">詳細</a>
-													<a class="btn btn-success" th:href="'UserUpdate?id=' + ${userList.get(seq).getId()}">更新</a>
-													<a class="btn btn-danger" th:href="'UserDelete?id=' + ${userList.get(seq).getId()}">削除</a>
-												</td>
-											</tr>
 											</div>
-										</div>
+											<td>
+												<a class="btn btn-primary" th:href="'UserDetail?id=' + ${user.getId()}">詳細</a>
+												<a class="btn btn-success" th:href="'UserUpdate?id=' + ${user.getId()}">更新</a>
+												<a class="btn btn-danger" th:href="'UserDelete?id=' + ${user.getId()}">削除</a>
+											</td>
+										</tr>
 									</tbody>
 								</table>
 							</div>

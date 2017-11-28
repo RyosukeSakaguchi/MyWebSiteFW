@@ -3,6 +3,8 @@ package com.example.demo.repository;
 import java.sql.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
@@ -24,4 +26,8 @@ public interface UserRepository extends CrudRepository< User, Long>, JpaSpecific
 	// SELECT * FROM User WHERE login_id = ?1, password = ?2
 	List<User> findByLoginIdIsAndNameContainingAndPositionIsAndBirthDateBetween(String loginId, String name, String Position, Date birthDateFrom, Date birthDateTo);
 
+	Page<User> findByIdIsNot(int id ,Pageable pageable);
+
+
 }
+

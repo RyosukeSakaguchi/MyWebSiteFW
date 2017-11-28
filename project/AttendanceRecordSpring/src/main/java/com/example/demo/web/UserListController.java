@@ -8,10 +8,11 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,7 +23,6 @@ import com.example.demo.common.UtilLogic;
 import com.example.demo.form.UserListForm;
 import com.example.demo.model.PositionMaster;
 import com.example.demo.model.User;
-import com.example.demo.model.WorkSituation;
 import com.example.demo.repository.PositionRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.WorkSituationRepository;
@@ -61,39 +61,24 @@ public class UserListController {
 			if (userListForm.getPageNumber() != 0) {
 
 				// リクエストパラメータがnullでない時、idリストのパラメータに対応するユーザーリストを生成
-				List<User> userList = new ArrayList<User>();
-				int[] userIdList = userListForm.getUserIdList();
-				for (int i = 0; i < userIdList.length; i++) {
-					User userInfo = userRepository.findByIdIs(userIdList[i]);
-					userList.add(userInfo);
-				}
 				int pageNumber = userListForm.getPageNumber();
+				Page<User> page = userRepository.findByIdIsNot(1, new PageRequest(pageNumber, userNumberPerPage));
 
 				// リクエストスコープに保存
-				int totalPageNumber = UtilLogic.getTotalPageNumber(userList, userNumberPerPage);
-				model.addAttribute("userNumberPerPage", userNumberPerPage);
-				model.addAttribute("totalPageNumber", totalPageNumber);
-				model.addAttribute("pageNumber", pageNumber);
-				model.addAttribute("userList", userList);
 				model.addAttribute("login_id", userListForm.getLoginId());
 				model.addAttribute("name", userListForm.getName());
 				model.addAttribute("position", userListForm.getPosition());
 				model.addAttribute("birth_date_from", userListForm.getBirthDateFrom());
 				model.addAttribute("birth_date_to", userListForm.getBirthDateTo());
 				model.addAttribute("workSituation", userListForm.getWorkSituation());
+				model.addAttribute("page", page);
+
 			} else {
-				// userテーブルにある全てのユーザーを取り出し、勤務中のユーザー」を先に並べ、
-				// 「帰宅しているユーザー」を後に並べかえ、 さらに管理者がリストに入っている場合は取り除く
-				List<User> userList = userRepository.findAll();
-				userList = UtilLogic.userListSort(userList, workSituationRepository);
+				int pageNumber = 0;
+				Page<User> page = userRepository.findByIdIsNot(1, new PageRequest(pageNumber, userNumberPerPage));
 
 				// リクエストスコープに保存
-				int totalPageNumber = UtilLogic.getTotalPageNumber(userList, userNumberPerPage);
-				int pageNumber = 1;
-				model.addAttribute("userNumberPerPage", userNumberPerPage);
-				model.addAttribute("totalPageNumber", totalPageNumber);
-				model.addAttribute("pageNumber", pageNumber);
-				model.addAttribute("userList", userList);
+				model.addAttribute("page", page);
 			}
 
 			Date now = new Date(System.currentTimeMillis());
@@ -126,72 +111,34 @@ public class UserListController {
 
 		List<User> userList = new ArrayList<User>();
 		Date now = new Date(System.currentTimeMillis());
-		if (StringUtils.isEmpty(userListForm.getWorkSituation())) {
-			// ユーザーを検索し、userListに代入
-			userList = userRepository.findAll(Specifications.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
-					.and(UtilLogic.nameContains(userListForm.getName()))
-					.and(UtilLogic.positionIs(userListForm.getPosition()))
-					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
-		} else if(userListForm.getWorkSituation().equals("勤務中")){
-			List<User> userList1 = userRepository.findAll(Specifications
-					.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
-					.and(UtilLogic.nameContains(userListForm.getName()))
-					.and(UtilLogic.positionIs(userListForm.getPosition()))
-					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
+		int userNumberPerPage = 5;
+		int pageNumber = 0;
+		// ユーザーを検索し、userListに代入
 
-			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 6);
-			for (User user : userList1) {
-				boolean result = false;
-				for (WorkSituation workSituation : workSituationList) {
-					if (workSituation.getLoginId().equals(user.getLoginId())) {
-						result = true;
-					}
-				}
-				if (result) {
-					userList.add(userRepository.findByLoginIdIs(user.getLoginId()));
-				}
-			}
-
-		}else {
-			List<User> userList1 = userRepository.findAll(Specifications
-					.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
-					.and(UtilLogic.nameContains(userListForm.getName()))
-					.and(UtilLogic.positionIs(userListForm.getPosition()))
-					.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo())));
-
-			List<WorkSituation> workSituationList = workSituationRepository.findByCreateDateIsAndWorkSituLengthIs(now, 6);
-
-			for (User user : userList1) {
-				boolean result = true;
-				for (WorkSituation workSituation : workSituationList) {
-					if (workSituation.getLoginId().equals(user.getLoginId())) {
-						result = false;
-					}
-				}
-				if (result) {
-					userList.add(userRepository.findByLoginIdIs(user.getLoginId()));
-				}
-			}
-
-		}
-
-		userList = UtilLogic.userListSort(userList, workSituationRepository);
+		Page<User> page = userRepository.findAll(Specifications.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
+						.and(UtilLogic.nameContains(userListForm.getName()))
+						.and(UtilLogic.positionIs(userListForm.getPosition()))
+						.and(UtilLogic.birthDateBetween(userListForm.getBirthDateFrom(), userListForm.getBirthDateTo()))
+						.and(UtilLogic.workSituationIs(userListForm.getWorkSituation()))
+						.and(UtilLogic.idIsNot(1)),
+				new PageRequest(pageNumber, userNumberPerPage));
 
 		// リクエストパラメータを保存
-		int userNumberPerPage = 5;
 		int totalPageNumber = UtilLogic.getTotalPageNumber(userList, userNumberPerPage);
-		int pageNumber = 1;
+
 		model.addAttribute("userList", userList);
 		model.addAttribute("userNumberPerPage", userNumberPerPage);
 		model.addAttribute("totalPageNumber", totalPageNumber);
 		model.addAttribute("pageNumber", pageNumber);
-		model.addAttribute("login_id", userListForm.getLoginId());
+		model.addAttribute("loginId", userListForm.getLoginId());
 		model.addAttribute("name", userListForm.getName());
 		model.addAttribute("position", userListForm.getPosition());
-		model.addAttribute("birth_date_from", userListForm.getBirthDateFrom());
-		model.addAttribute("birth_date_to", userListForm.getBirthDateTo());
+		model.addAttribute("birthDateFrom", userListForm.getBirthDateFrom());
+		model.addAttribute("birthDateTo", userListForm.getBirthDateTo());
 		model.addAttribute("workSituation", userListForm.getWorkSituation());
 		model.addAttribute("workSituationRepository", workSituationRepository);
+		model.addAttribute("page", page);
+
 		model.addAttribute("utilLogic", new UtilLogic());
 
 		SimpleDateFormat y = new SimpleDateFormat("yyyy");

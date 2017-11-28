@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.demo.common.UtilLogic;
 import com.example.demo.form.UserDeleteForm;
 import com.example.demo.form.UserListForm;
 import com.example.demo.model.User;
@@ -97,7 +98,7 @@ public class UserDeleteController {
 	public String post(@ModelAttribute UserDeleteForm userDeleteForm, Model model) {
 
 		// リクエストスコープにパラメーターがあるかで分岐
-		if (String.valueOf(userDeleteForm.getId()).length() == 0) {
+		if (userDeleteForm.getId() == 0) {
 
 			// パラメータがnullかそうでないかで分岐
 			if (userDeleteForm.getIdList() != null) {
@@ -107,19 +108,45 @@ public class UserDeleteController {
 				for (int i = 0; i < idList.length; i++) {
 					User user = new User();
 					user = userRepository.findByIdIs(idList[i]);
-//					WorkSituationDao.userSituDel(user.getLoginId());
-//					WorkSituationEditDao.userSituEditDel(user.getLoginId());
-//					UserInfoDao.userDel(idList[i]);
+
+					List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
+					workSituationList = workSituationRepository.findByLoginIdIs(user.getLoginId());
+					for(WorkSituation workSituation : workSituationList) {
+						workSituationRepository.delete(workSituation);
+					}
+
+					List<WorkSituationEdit> workSituationEditList = new ArrayList<WorkSituationEdit>();
+					workSituationEditList = workSituationEditRepository.findByLoginIdIs(user.getLoginId());
+					for(WorkSituationEdit workSituationEdit : workSituationEditList) {
+						workSituationEditRepository.delete(workSituationEdit);
+					}
+
+					userRepository.delete(user);
 
 					// ユーザー消去成功のメッセージをリクエストスコープに保存
 					model.addAttribute("sucMsg", "ユーザー情報の削除に成功しました");
 
 				}
 			} else {
-				// // 全ての勤務状況と勤務状況編集履歴とユーザー情報を削除
-				// WorkSituationDao.allUserSituDel();
-				// WorkSituationEditDao.allUserSituEditDel();
-				// UserInfoDao.allUserDel();
+				// 全ての勤務状況と勤務状況編集履歴とユーザー情報を削除
+				List<User> userList = new ArrayList<User>();
+				userList = userRepository.findAll();
+				userList = UtilLogic.userListSort(userList, workSituationRepository);
+
+				for(User user : userList) {
+					List<WorkSituation> workSituationList = new ArrayList<WorkSituation>();
+					workSituationList = workSituationRepository.findByLoginIdIs(user.getLoginId());
+					for(WorkSituation workSituation : workSituationList) {
+						workSituationRepository.delete(workSituation);
+					}
+
+					List<WorkSituationEdit> workSituationEditList = new ArrayList<WorkSituationEdit>();
+					workSituationEditList = workSituationEditRepository.findByLoginIdIs(user.getLoginId());
+					for(WorkSituationEdit workSituationEdit : workSituationEditList) {
+						workSituationEditRepository.delete(workSituationEdit);
+					}
+					userRepository.delete(user);
+				}
 
 				// ユーザー消去成功のメッセージをリクエストスコープに保存
 				model.addAttribute("sucMsg", "全ユーザー情報の削除に成功しました");
@@ -128,7 +155,6 @@ public class UserDeleteController {
 			// UserListへリダイレクト
 			return "redirect:/UserList";
 		} else {
-
 
 			// 消去するユーザーのidに対応する勤務状況と勤務状況編集履歴とユーザー情報を削除
 			User user = new User();

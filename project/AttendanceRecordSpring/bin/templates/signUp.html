@@ -32,7 +32,7 @@
 							<div class="wrapper2">
 								<div class="fh5co-left-position"><br/><br/><br/><br/>
 									<h2 class="animate-box">Sign Up</h2>
-									<h2 class="animate-box"><font size="5" color="red"><div th:text="${errMsg}" /></font></h2>
+									<font size="3" color="red"><div th:text="${errMsg}" /></font>
 									<div th:object="${signUpForm}">
 										<font color="red" size="3">
 											<span th:if="${#fields.hasErrors('loginId')}" th:errors="*{loginId}"></span><br/>
