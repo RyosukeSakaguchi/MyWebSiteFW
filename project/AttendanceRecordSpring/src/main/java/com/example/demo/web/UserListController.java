@@ -112,7 +112,7 @@ public class UserListController {
 		List<User> userList = new ArrayList<User>();
 		Date now = new Date(System.currentTimeMillis());
 		int userNumberPerPage = 5;
-		int pageNumber = 0;
+		int pageNumber = userListForm.getPageNumber();
 		// ユーザーを検索し、userListに代入
 
 		Page<User> page = userRepository.findAll(Specifications.where(UtilLogic.loginIdIs(userListForm.getLoginId()))
